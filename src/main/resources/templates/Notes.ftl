@@ -183,7 +183,7 @@
         }
         .bubble-content {
             position: relative;
-            padding: 8px 12px;
+            padding: 10px 28px 8px 12px;
             max-width: 100%;
             word-wrap: break-word;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
@@ -246,7 +246,7 @@
         .bubble-arrow-menu {
             position: absolute;
             top: 4px;
-            right: 4px;
+            right: 2px;
             opacity: 0;
             transition: opacity 0.2s;
         }
@@ -441,7 +441,7 @@
                         var now = new Date();
                         if(isWithin30Minutes(now, new Date(note.date))) {
                             if (action === 'delete') {
-                                if (!confirm('Hapus note ini?')) return;
+                                if (!confirm('Delete this note?')) return;
                                 var index = jsonNotes.findIndex(function(n) {
                                     return n.id === id;
                                 });
