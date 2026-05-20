@@ -7,11 +7,8 @@ import org.joget.apps.form.model.*;
 import org.joget.apps.form.service.FormUtil;
 import org.joget.directory.model.User;
 import org.joget.plugin.base.PluginManager;
-import org.joget.workflow.model.service.WorkflowManager;
 import org.joget.workflow.model.service.WorkflowUserManager;
-import org.joget.workflow.util.WorkflowUtil;
 import org.springframework.context.ApplicationContext;
-
 
 /**
  * @author AKMAL
@@ -47,7 +44,7 @@ public class Notes extends Element implements FormBuilderPaletteElement {
 
     @Override
     public String getPropertyOptions() {
-        return AppUtil.readPluginResource(getClassName(), "/properties/Notes.json");
+        return AppUtil.readPluginResource(this.getClass().getName(), "/properties/Notes.json");
     }
 
     @Override
@@ -86,6 +83,18 @@ public class Notes extends Element implements FormBuilderPaletteElement {
             rowSet.get(0).put(id, value);
         }
 
+        String primaryKey = formData.getPrimaryKeyValue();
+        formData.addRequestParameterValues("id",
+                new String[] { primaryKey });
+
+        rowSet.get(0).setId(primaryKey);
+        rowSet.get(0).put("id", primaryKey);
+
+        FormStoreBinder storeBinder = this.getStoreBinder();
+        if (storeBinder != null) {
+            storeBinder.store(this, rowSet, formData);
+        }
+
         return rowSet;
     }
 
@@ -95,10 +104,23 @@ public class Notes extends Element implements FormBuilderPaletteElement {
         return renderTemplate(template, formData, dataModel);
     }
 
-
     private String renderTemplate(String template, FormData formData, @SuppressWarnings("rawtypes") Map dataModel) {
         ApplicationContext appContext = AppUtil.getApplicationContext();
-        String value = FormUtil.getElementPropertyValue(this, formData);
+        String value = "";
+        formData.addRequestParameterValues("id",
+                new String[] { formData.getPrimaryKeyValue() });
+
+        FormLoadBinder loadBinder = this.getLoadBinder();
+        if (loadBinder != null) {
+            FormRowSet rowSet = loadBinder.load(this,
+                    formData.getPrimaryKeyValue(), formData);
+            if (rowSet != null && !rowSet.isEmpty()) {
+                value = rowSet.get(0)
+                        .getProperty(getPropertyString(FormUtil.PROPERTY_ID));
+            }
+        } else {
+            value = FormUtil.getElementPropertyValue(this, formData);
+        }
 
         WorkflowUserManager workflowUserManager = (WorkflowUserManager) appContext.getBean("workflowUserManager");
         User user = workflowUserManager.getCurrentUser();
@@ -123,4 +145,3 @@ public class Notes extends Element implements FormBuilderPaletteElement {
         return html;
     }
 }
-
