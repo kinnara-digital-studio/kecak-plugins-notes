@@ -2,12 +2,18 @@ package com.kinnara.kecakplugins.notes;
 
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.UUID;
+
+import com.google.gson.JsonObject;
 import org.joget.apps.app.service.AppUtil;
 import org.joget.apps.form.model.*;
 import org.joget.apps.form.service.FormUtil;
+import org.joget.commons.util.LogUtil;
 import org.joget.directory.model.User;
 import org.joget.plugin.base.PluginManager;
 import org.joget.workflow.model.service.WorkflowUserManager;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -76,7 +82,6 @@ public class Notes extends Element implements FormBuilderPaletteElement {
         }
 
         String id = getPropertyString(FormUtil.PROPERTY_ID);
-
         String value = formData.getRequestParameter(id);
 
         if (value != null) {
@@ -84,17 +89,42 @@ public class Notes extends Element implements FormBuilderPaletteElement {
         }
 
         String primaryKey = formData.getPrimaryKeyValue();
-        formData.addRequestParameterValues("id",
-                new String[] { primaryKey });
+        formData.addRequestParameterValues("id", new String[] { primaryKey });
 
         rowSet.get(0).setId(primaryKey);
         rowSet.get(0).put("id", primaryKey);
 
         FormStoreBinder storeBinder = this.getStoreBinder();
         if (storeBinder != null) {
-            storeBinder.store(this, rowSet, formData);
-        }
+            if (value != null && !value.isEmpty()) {
+                try {
+                    JSONArray jsonArray = new JSONArray(value);
+                    FormRowSet multirowSet = new FormRowSet();
 
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject newNote = jsonArray.getJSONObject(i);
+                        String noteId = newNote.optString("id", UUID.randomUUID().toString());
+
+                        FormRow noteRow = new FormRow();
+                        noteRow.setId(noteId);
+                        noteRow.put("id", noteId);
+                        noteRow.put("record_id", primaryKey); // Relasi ke Form Utama
+                        noteRow.put("username", newNote.optString("username"));
+                        noteRow.put("name", newNote.optString("name"));
+                        noteRow.put("date", newNote.optString("date"));
+                        noteRow.put("notes", newNote.optString("notes"));
+                        noteRow.put("type", newNote.optString("type", "note"));
+
+                        multirowSet.add(noteRow);
+                    }
+
+                    storeBinder.store(this, multirowSet, formData);
+
+                } catch (Exception e) {
+                    LogUtil.error(getClassName(), e, "Error parsing multirow: " + e.getMessage());
+                }
+            }
+        }
         return rowSet;
     }
 
@@ -115,9 +145,26 @@ public class Notes extends Element implements FormBuilderPaletteElement {
             FormRowSet rowSet = loadBinder.load(this,
                     formData.getPrimaryKeyValue(), formData);
             if (rowSet != null && !rowSet.isEmpty()) {
-                value = rowSet.get(0)
-                        .getProperty(getPropertyString(FormUtil.PROPERTY_ID));
+                JSONArray jsonArray = new JSONArray();
+                rowSet.forEach(row -> {
+                    try {
+                        org.json.JSONObject jsonObject = new org.json.JSONObject();
+                        jsonObject.put("id", row.getId());
+                        jsonObject.put("record_id", row.getProperty("record_id"));
+                        jsonObject.put("username", row.getProperty("username"));
+                        jsonObject.put("name", row.getProperty("name"));
+                        jsonObject.put("date", row.getProperty("date"));
+                        jsonObject.put("notes", row.getProperty("notes"));
+                        jsonObject.put("type", row.getProperty("type"));
+                        jsonArray.put(jsonObject);
+                    } catch (Exception e){
+                        LogUtil.error(getClassName(), e, "error: " + e);
+                    }
+                });
+                value = jsonArray.toString();
+                LogUtil.info(getClassName(), value);
             }
+            LogUtil.info(getClassName(), value);
         } else {
             value = FormUtil.getElementPropertyValue(this, formData);
         }
@@ -129,10 +176,10 @@ public class Notes extends Element implements FormBuilderPaletteElement {
 
         String readOnly = getPropertyString("readonly");
         String readOnlyAsLabel = getPropertyString("readonlyLabel");
-
         boolean isReadOnly = "true".equalsIgnoreCase(readOnly) || FormUtil.isReadonly(this, formData);
-
         boolean isReadOnlyLabel = isReadOnly && "true".equalsIgnoreCase(readOnlyAsLabel);
+
+        boolean isMultirow = this.getLoadBinder() != null;
 
         dataModel.put("value", (value == null || value.isEmpty()) ? "[]" : value);
         dataModel.put("className", getClassName());
@@ -140,6 +187,8 @@ public class Notes extends Element implements FormBuilderPaletteElement {
         dataModel.put("name", name);
         dataModel.put("isReadOnly", isReadOnly);
         dataModel.put("isReadOnlyLabel", isReadOnlyLabel);
+        dataModel.put("isMultirow", isMultirow);
+        dataModel.put("primaryKey", formData.getPrimaryKeyValue());
 
         String html = FormUtil.generateElementHtml(this, formData, template, dataModel);
         return html;

@@ -332,9 +332,13 @@
         var userName = '${userName}';
         var displayName = '${name}';
 
+        var isMultirow = ${isMultirow?c};
+        var primaryKey = '${primaryKey!}';
+
         var jsonNotes = ${value!'[]'};
         if (!Array.isArray(jsonNotes)) jsonNotes = [];
 
+        var newNotes = [];
         var editor = document.getElementById('notes-editor-' + paramName);
 
         if (editor) {
@@ -357,17 +361,25 @@
                         alert("note can't be empty");
                         return;
                     };
-                    jsonNotes.push({
-                        id: crypto.randomUUID(),
+                    var newNote = {
                         username: userName,
                         name: displayName,
                         date: new Date().toISOString(),
-                        notes: html
-                    });
-                    renderNotes(jsonNotes);
-                    document.getElementById(paramName).value = JSON.stringify(jsonNotes);
-                    quill.setContents([]);
+                        notes: html,
+                        type: 'note'
+                    };
+                    if (isMultirow) {
+                        newNote.record_id = primaryKey;
+                        newNotes.push(newNote);
+                        document.getElementById(paramName).value = JSON.stringify(newNotes);
+                        jsonNotes.push(newNote);
+                    } else{
+                        jsonNotes.push(newNote);
+                        document.getElementById(paramName).value = JSON.stringify(jsonNotes);
+                    }
 
+                    renderNotes(jsonNotes);
+                    quill.setContents([]);
                     document.querySelectorAll('.bubble-dropdown').forEach(function(d) {
                         d.style.display = 'none';
                     });
