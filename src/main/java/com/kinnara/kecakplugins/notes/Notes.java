@@ -75,57 +75,51 @@ public class Notes extends Element implements FormBuilderPaletteElement {
 
     @Override
     public FormRowSet formatData(FormData formData) {
-        FormRowSet rowSet = super.formatData(formData);
-        if (rowSet == null || rowSet.isEmpty()) {
-            rowSet = new FormRowSet();
-            rowSet.add(new FormRow());
-        }
 
         String id = getPropertyString(FormUtil.PROPERTY_ID);
         String value = formData.getRequestParameter(id);
-
-        if (value != null) {
-            rowSet.get(0).put(id, value);
-        }
-
         String primaryKey = formData.getPrimaryKeyValue();
-        formData.addRequestParameterValues("id", new String[] { primaryKey });
-
-        rowSet.get(0).setId(primaryKey);
-        rowSet.get(0).put("id", primaryKey);
 
         FormStoreBinder storeBinder = this.getStoreBinder();
         if (storeBinder != null) {
+            FormRowSet formRowSet = new FormRowSet();
+            formRowSet.setMultiRow(true);
             if (value != null && !value.isEmpty()) {
                 try {
                     JSONArray jsonArray = new JSONArray(value);
-                    FormRowSet multirowSet = new FormRowSet();
-
                     for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject newNote = jsonArray.getJSONObject(i);
-                        String noteId = newNote.optString("id", UUID.randomUUID().toString());
+                        JSONObject note = jsonArray.getJSONObject(i);
+                        String noteId = note.optString("id");
+                        if (noteId == null || noteId.isEmpty()) noteId = UUID.randomUUID().toString();
 
-                        FormRow noteRow = new FormRow();
-                        noteRow.setId(noteId);
-                        noteRow.put("id", noteId);
-                        noteRow.put("record_id", primaryKey); // Relasi ke Form Utama
-                        noteRow.put("username", newNote.optString("username"));
-                        noteRow.put("name", newNote.optString("name"));
-                        noteRow.put("date", newNote.optString("date"));
-                        noteRow.put("notes", newNote.optString("notes"));
-                        noteRow.put("type", newNote.optString("type", "note"));
+                        FormRow formRow = new FormRow();
+                        formRow.setId(noteId);
+                        formRow.put("id", noteId);
+                        formRow.put("record_id", primaryKey);
+                        formRow.put("username", note.optString("username"));
+                        formRow.put("name", note.optString("name"));
+                        formRow.put("date", note.optString("date"));
+                        formRow.put("notes", note.optString("notes"));
+                        formRow.put("type", note.optString("type", "note"));
 
-                        multirowSet.add(noteRow);
+                        formRowSet.add(formRow);
                     }
-
-                    storeBinder.store(this, multirowSet, formData);
-
                 } catch (Exception e) {
                     LogUtil.error(getClassName(), e, "Error parsing multirow: " + e.getMessage());
                 }
             }
+            return formRowSet;
+        } else {
+            FormRowSet formRowSet = super.formatData(formData);
+            if (formRowSet == null || formRowSet.isEmpty()){
+                formRowSet = new FormRowSet();
+                formRowSet.add(new FormRow());
+            }
+            if (value != null) {
+                formRowSet.get(0).put(id, value);
+            }
+            return formRowSet;
         }
-        return rowSet;
     }
 
     @Override

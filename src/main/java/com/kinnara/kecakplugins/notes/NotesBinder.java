@@ -1,8 +1,12 @@
 package com.kinnara.kecakplugins.notes;
 
+import org.joget.apps.app.dao.FormDefinitionDao;
+import org.joget.apps.app.model.AppDefinition;
+import org.joget.apps.app.model.FormDefinition;
 import org.joget.apps.app.service.AppUtil;
 import org.joget.apps.form.dao.FormDataDao;
 import org.joget.apps.form.model.*;
+import org.joget.apps.form.service.FormService;
 import org.joget.apps.form.service.FormUtil;
 import org.joget.commons.util.LogUtil;
 import org.joget.plugin.base.PluginManager;
@@ -45,34 +49,36 @@ public class NotesBinder extends FormBinder implements
 
     @Override
     public FormRowSet store(Element element, FormRowSet formRowSet, FormData formData) {
-        FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
+        LogUtil.info(getClassName(), "NotesBinder.store() called, formRowSet Size: " + formRowSet.size());
 
-        //LogUtil.info(getClassName(), "=== NotesBinder.store() dipanggil ===");
+        for (int i = 0; i < formRowSet.size(); i++) {
+            FormRow row = formRowSet.get(i);
+            LogUtil.info(getClassName(), "=== Baris ke-" + (i + 1) + " (ID Note: " + row.getId() + ") ===");
 
-        String fieldId = element.getPropertyString(FormUtil.PROPERTY_ID);
-        //LogUtil.info(getClassName(), "fieldId: " + fieldId);
-        Form form = FormUtil.findRootForm(element);
-
-        String updatedJson = formRowSet.get(0).getProperty(fieldId);
-        //LogUtil.info(getClassName(), "updatedJson: " + updatedJson);
-        String primaryKey = formData.getPrimaryKeyValue();
-        //LogUtil.info(getClassName(), "primaryKey: " + primaryKey);
-        FormRow formRow = formDataDao.load(form, primaryKey);
-
-        if(formRow == null){
-            formRow = new FormRow();
-            //LogUtil.info(getClassName(), "formRow Null");
+            // Looping untuk membedah semua nama kolom dan value-nya
+            for (String columnName : row.stringPropertyNames()) {
+                String value = row.getProperty(columnName);
+                LogUtil.info(getClassName(), "  -> Kolom [" + columnName + "] = " + value);
+            }
         }
 
-        formRow.put(fieldId, updatedJson);
+        FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
 
-        FormRowSet rowSet = new FormRowSet();
-        rowSet.add(formRow);
-        formDataDao.saveOrUpdate(form, rowSet);
+        String notesFormDefId = element.getPropertyString("notesFormDefId");
+        Form notesForm = generateForm(notesFormDefId);
 
-        //LogUtil.info(getClassName(), "=== store() selesai ===");
+        if(notesForm == null) {
+            LogUtil.warn(getClassName(), "notesForm null! cek notesFormDefId: " + notesFormDefId);
+            return formRowSet;
+        }
 
-        return rowSet;
+        try {
+            formDataDao.saveOrUpdate(notesForm, formRowSet);
+            LogUtil.info(getClassName(), "Sukses menyimpan " + formRowSet.size() + " notes ke database.");
+        } catch (Exception e) {
+            LogUtil.error(getClassName(), e, "save failed, error: " + e);
+        }
+        return formRowSet;
     }
 
     @Override
@@ -106,5 +112,23 @@ public class NotesBinder extends FormBinder implements
     @Override
     public String getDescription() {
         return getClass().getPackage().getImplementationTitle();
+    }
+
+    private Form generateForm(String formDefId) {
+        if (formDefId == null || formDefId.isEmpty()) return null;
+
+        AppDefinition appDefinition = AppUtil.getCurrentAppDefinition();
+        FormService formService = (FormService) AppUtil.getApplicationContext().getBean("formService");
+        FormDefinitionDao formDefinitionDao = (FormDefinitionDao) AppUtil.getApplicationContext().getBean("formDefinitionDao");
+
+        FormDefinition formDefinition = formDefinitionDao.loadById(formDefId, appDefinition);
+
+        if(formDefinition == null) {
+            LogUtil.warn(getClassName(), "formDef not found: " + formDefId);
+            return null;
+        }
+
+        return (Form) formService.createElementFromJson(formDefinition.getJson());
+
     }
 }
