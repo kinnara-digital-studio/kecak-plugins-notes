@@ -7,7 +7,6 @@ import org.joget.apps.app.service.AppUtil;
 import org.joget.apps.form.dao.FormDataDao;
 import org.joget.apps.form.model.*;
 import org.joget.apps.form.service.FormService;
-import org.joget.apps.form.service.FormUtil;
 import org.joget.commons.util.LogUtil;
 import org.joget.plugin.base.PluginManager;
 
@@ -15,36 +14,22 @@ import java.util.ResourceBundle;
 
 public class NotesBinder extends FormBinder implements
         FormLoadElementBinder,
-        FormStoreElementBinder {
+        FormLoadMultiRowElementBinder,
+        FormStoreElementBinder,
+        FormStoreMultiRowElementBinder {
 
     private final static String LABEL = "Notes Binder";
 
     @Override
     public FormRowSet load(Element element, String s, FormData formData) {
-        LogUtil.info(getClassName(), "=== NotesBinder.load() dipanggil ===");
-        //LogUtil.info(getClassName(), "primaryKey: " + s);
-        //LogUtil.info(getClassName(), "fieldId: " + element.getPropertyString(FormUtil.PROPERTY_ID));
         FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
-
-        Form form = FormUtil.findRootForm(element);
-
-        //LogUtil.info(getClassName(), "form: " + (form != null ? form.getPropertyString("id") : "NULL"));
-
-        FormRow formRow = formDataDao.load(form, s);
-
-        LogUtil.info(getClassName(), "formRow loaded: " + (formRow != null ? "YES" : "NULL"));
-
-        if(formRow == null){
-            formRow = new FormRow();
+        String notesFormDefId = element.getPropertyString("notesFormDefId");
+        Form notesForm = generateForm(notesFormDefId);
+        FormRowSet rowSet = formDataDao.find(notesForm, "WHERE c_record_id = ?", new Object[]{s}, "dateCreated", true, null, null);
+        if(rowSet != null) {
+            rowSet.setMultiRow(true);
         }
-
-        String value = formRow.getProperty(element.getPropertyString(FormUtil.PROPERTY_ID));
-        LogUtil.info(getClassName(), "value dari DB: " + value);
-
-        FormRowSet formRowSet = new FormRowSet();
-
-        formRowSet.add(formRow);
-        return formRowSet;
+        return rowSet;
     }
 
     @Override
@@ -67,7 +52,7 @@ public class NotesBinder extends FormBinder implements
         String notesFormDefId = element.getPropertyString("notesFormDefId");
         Form notesForm = generateForm(notesFormDefId);
 
-        if(notesForm == null) {
+        if (notesForm == null) {
             LogUtil.warn(getClassName(), "notesForm null! cek notesFormDefId: " + notesFormDefId);
             return formRowSet;
         }
@@ -123,7 +108,7 @@ public class NotesBinder extends FormBinder implements
 
         FormDefinition formDefinition = formDefinitionDao.loadById(formDefId, appDefinition);
 
-        if(formDefinition == null) {
+        if (formDefinition == null) {
             LogUtil.warn(getClassName(), "formDef not found: " + formDefId);
             return null;
         }
