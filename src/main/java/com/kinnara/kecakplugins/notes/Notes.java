@@ -81,8 +81,9 @@ public class Notes extends Element implements FormBuilderPaletteElement {
         String primaryKey = formData.getPrimaryKeyValue();
 
         FormStoreBinder storeBinder = this.getStoreBinder();
+        FormRowSet formRowSet;
         if (storeBinder != null) {
-            FormRowSet formRowSet = new FormRowSet();
+            formRowSet = new FormRowSet();
             formRowSet.setMultiRow(true);
             if (value != null && !value.isEmpty()) {
                 try {
@@ -108,9 +109,8 @@ public class Notes extends Element implements FormBuilderPaletteElement {
                     LogUtil.error(getClassName(), e, "Error parsing multirow: " + e.getMessage());
                 }
             }
-            return formRowSet;
         } else {
-            FormRowSet formRowSet = super.formatData(formData);
+            formRowSet = super.formatData(formData);
             if (formRowSet == null || formRowSet.isEmpty()){
                 formRowSet = new FormRowSet();
                 formRowSet.add(new FormRow());
@@ -118,8 +118,8 @@ public class Notes extends Element implements FormBuilderPaletteElement {
             if (value != null) {
                 formRowSet.get(0).put(id, value);
             }
-            return formRowSet;
         }
+        return formRowSet;
     }
 
     @Override
