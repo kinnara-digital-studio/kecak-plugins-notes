@@ -4,3 +4,4 @@ package-lock.json
 .idea/
 .settings/
 jdbc_binder_queries.sql
+notesFix.ftl

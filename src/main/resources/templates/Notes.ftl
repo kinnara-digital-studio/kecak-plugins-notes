@@ -6,7 +6,7 @@
     </#if>
 
     <div class="form-cell-value notes-element-wrapper">
-        <input type='hidden' name='${elementParamName!}' id='${elementParamName!}' value="" >
+        <input type='hidden' name='${elementParamName!}' id='${elementParamName!}' value="">
 
         <#if isReadOnlyLabel!false>
             <div id="note-list-${elementParamName!}" class="note-list-container"></div>
@@ -341,6 +341,13 @@
         var newNotes = [];
         var editor = document.getElementById('notes-editor-' + paramName);
 
+        var hiddenInput = document.getElementById(paramName);
+        var allHiddenInputs = document.querySelectorAll('input[type="hidden"][name="' + paramName + '"]');
+
+        //console.log('[Notes DEBUG] jsonNotes.length:', jsonNotes.length);
+        //console.log('[Notes DEBUG] hiddenInput found:', !!hiddenInput);
+        //console.log('[Notes DEBUG] Total hidden inputs with same name:', allHiddenInputs.length);
+
         if (editor) {
             const quill = new Quill('#notes-editor-' + paramName, {
                 readOnly: ${(isReadOnly!false)?c},
@@ -370,13 +377,24 @@
                     };
                     if (isMultirow) {
                         newNote.record_id = primaryKey;
-                        newNotes.push(newNote);
-                        document.getElementById(paramName).value = JSON.stringify(newNotes);
-                        jsonNotes.push(newNote);
-                    } else{
-                        jsonNotes.push(newNote);
-                        document.getElementById(paramName).value = JSON.stringify(jsonNotes);
                     }
+                    //console.log('[Notes DEBUG] newNote:', JSON.stringify(newNote));
+
+                    jsonNotes.push(newNote);
+                    //console.log('[Notes DEBUG] Add clicked! jsonNotes.length after push:', jsonNotes.length);
+                    //console.log('[Notes DEBUG] jsonNotes:', JSON.stringify(jsonNotes));
+
+                    var targetInput = document.getElementById(paramName);
+                    //console.log('[Notes DEBUG] targetInput found:', !!targetInput);
+
+                    targetInput.value = JSON.stringify(jsonNotes);
+                    //console.log('[Notes DEBUG] Value SET. Length of value string:', targetInput.value.length);
+
+                    var allInputs = document.querySelectorAll('input[type="hidden"][name="' + paramName + '"]');
+                    //console.log('[Notes DEBUG] Updating ALL hidden inputs, count:', allInputs.length);
+                    allInputs.forEach(function(inp) {
+                        inp.value = JSON.stringify(jsonNotes);
+                    });
 
                     renderNotes(jsonNotes);
                     quill.setContents([]);

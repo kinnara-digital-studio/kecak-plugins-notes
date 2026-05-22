@@ -1,6 +1,5 @@
 package com.kinnara.kecakplugins.notes;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.UUID;
@@ -13,7 +12,6 @@ import org.joget.commons.util.LogUtil;
 import org.joget.directory.model.User;
 import org.joget.plugin.base.PluginManager;
 import org.joget.workflow.model.service.WorkflowUserManager;
-import org.joget.workflow.util.WorkflowUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
@@ -82,32 +80,21 @@ public class Notes extends Element implements FormBuilderPaletteElement {
         String value = formData.getRequestParameter(id);
         String primaryKey = formData.getPrimaryKeyValue();
 
-        FormLoadBinder loadBinder = getLoadBinder();
-        FormRowSet formRowSet;
-        if(loadBinder != null && formData.getLoadBinderData(this) != null) {
-            formRowSet = formData.getLoadBinderData(this);
-        } else {
-            formRowSet = new FormRowSet();
-        }
-
-        formRowSet.setMultiRow(true);
-
-        final Date now = new Date();
-        final String currentUser = WorkflowUtil.getCurrentUsername();
         FormStoreBinder storeBinder = this.getStoreBinder();
         if (storeBinder != null) {
+            FormRowSet formRowSet = new FormRowSet();
+            formRowSet.setMultiRow(true);
             if (value != null && !value.isEmpty()) {
                 try {
                     JSONArray jsonArray = new JSONArray(value);
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject note = jsonArray.getJSONObject(i);
-                        String noteId = note.optString("id", UUID.randomUUID().toString());
+                        String noteId = note.optString("id");
+                        if (noteId == null || noteId.isEmpty()) noteId = UUID.randomUUID().toString();
 
                         FormRow formRow = new FormRow();
                         formRow.setId(noteId);
                         formRow.put("id", noteId);
-                        formRow.put("dateCreated", now);
-                        formRow.put("createdBy", currentUser);
                         formRow.put("record_id", primaryKey);
                         formRow.put("username", note.optString("username"));
                         formRow.put("name", note.optString("name"));
@@ -115,7 +102,7 @@ public class Notes extends Element implements FormBuilderPaletteElement {
                         formRow.put("notes", note.optString("notes"));
                         formRow.put("type", note.optString("type", "note"));
 
-                        formRowSet.add(0, formRow);
+                        formRowSet.add(formRow);
                     }
                 } catch (Exception e) {
                     LogUtil.error(getClassName(), e, "Error parsing multirow: " + e.getMessage());
@@ -123,7 +110,7 @@ public class Notes extends Element implements FormBuilderPaletteElement {
             }
             return formRowSet;
         } else {
-            formRowSet = super.formatData(formData);
+            FormRowSet formRowSet = super.formatData(formData);
             if (formRowSet == null || formRowSet.isEmpty()){
                 formRowSet = new FormRowSet();
                 formRowSet.add(new FormRow());
@@ -169,9 +156,7 @@ public class Notes extends Element implements FormBuilderPaletteElement {
                     }
                 });
                 value = jsonArray.toString();
-                LogUtil.info(getClassName(), value);
             }
-            LogUtil.info(getClassName(), value);
         } else {
             value = FormUtil.getElementPropertyValue(this, formData);
         }

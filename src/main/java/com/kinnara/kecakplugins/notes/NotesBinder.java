@@ -25,7 +25,7 @@ public class NotesBinder extends FormBinder implements
         FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
         String notesFormDefId = element.getPropertyString("notesFormDefId");
         Form notesForm = generateForm(notesFormDefId);
-        FormRowSet rowSet = formDataDao.find(notesForm, "WHERE c_record_id = ?", new Object[]{s}, "dateCreated", true, null, null);
+        FormRowSet rowSet = formDataDao.find(notesForm, "WHERE c_record_id = ?", new Object[]{s}, "date", false, null, null);
         if(rowSet != null) {
             rowSet.setMultiRow(true);
         }
@@ -52,7 +52,7 @@ public class NotesBinder extends FormBinder implements
         String notesFormDefId = element.getPropertyString("notesFormDefId");
         Form notesForm = generateForm(notesFormDefId);
 
-        if (notesForm == null) {
+        if(notesForm == null) {
             LogUtil.warn(getClassName(), "notesForm null! cek notesFormDefId: " + notesFormDefId);
             return formRowSet;
         }
@@ -108,7 +108,7 @@ public class NotesBinder extends FormBinder implements
 
         FormDefinition formDefinition = formDefinitionDao.loadById(formDefId, appDefinition);
 
-        if (formDefinition == null) {
+        if(formDefinition == null) {
             LogUtil.warn(getClassName(), "formDef not found: " + formDefId);
             return null;
         }
