@@ -37,10 +37,10 @@
                         <button class="ql-indent" value="-1"></button>
                         <button class="ql-indent" value="+1"></button>
                     </span>
-                    <span class="ql-formats">
+                    <#--  <span class="ql-formats">
                         <button class="ql-direction" value="rtl"></button>
                         <select class="ql-align"></select>
-                    </span>
+                    </span>  -->
                     <span class="ql-formats">
                         <button class="ql-link"></button>
                         <button class="ql-image"></button>
@@ -144,27 +144,16 @@
             flex-direction: column;
             width: 100%;
             max-width: 100%;
-            background: #f0f6fb !important;
+            background: #fff !important;
             gap: 4px;
             padding: 12px;
             border-radius: 8px;
+            border: 1px solid #ccc;
             margin-top: 10px;
-            max-height: 420px;
-            overflow-y: auto;
             box-sizing: border-box;
         }
         .note-list-container:empty {
             display: none;
-        }
-        .note-list-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        .note-list-container::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .note-list-container::-webkit-scrollbar-thumb {
-            background: #c0c0c0;
-            border-radius: 3px;
         }
 
         .note-bubble {
@@ -172,55 +161,68 @@
             flex-direction: column;
             max-width: 100%;
             margin: 4px 0;
-        }
-        .bubble-right {
-            align-self: flex-end;
-            align-items: flex-end;
-        }
-        .bubble-left {
             align-self: flex-start;
             align-items: flex-start;
         }
         .bubble-content {
             position: relative;
-            padding: 10px 28px 8px 12px;
+            padding: 0 14px 10px 14px;
             max-width: 100%;
             word-wrap: break-word;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             font-size: 13px;
             line-height: 1.45;
+            border-radius: 8px !important;
         }
-        .bubble-right .bubble-content {
-            background: #dcf8c6 !important;
-            color: #111 !important;
-            border-radius: 14px 4px 14px 14px !important;
+        .bubble-mine .bubble-content {
+            background: #0d6efd !important;
+            color: #fff !important;
+            border: 1px solid #e0e0e0;
         }
-        .bubble-left .bubble-content {
+        .bubble-others .bubble-content {
             background: #ffffff !important;
             color: #111 !important;
-            border-radius: 4px 14px 14px 14px !important;
+            border: 1px solid #e0e0e0;
+        }
+        .bubble-header {
+            margin: 0 -14px 8px -14px;
+            padding: 8px 14px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            border-bottom: 1px solid #111;
+        }
+        .bubble-mine .bubble-header .bubble-name {
+            color: #fff;
+        }
+        .bubble-mine .bubble-header .bubble-date {
+            color: #e0e0e0;
+        }
+        .bubble-others .bubble-header .bubble-name {
+            color: #333;
+        }
+        .bubble-others .bubble-header .bubble-date {
+            color: #888;
+        }
+        .bubble-name {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .bubble-date {
+            font-size: 11px;
         }
         .bubble-content img {
             max-width: 100%;
             height: auto;
             border-radius: 6px;
         }
-        .bubble-content p {
+        .bubble-body p {
             margin: 0 0 4px 0;
         }
-        .bubble-content p:last-child {
+        .bubble-body p:last-child {
             margin-bottom: 0;
-        }
-        .bubble-name {
-            font-size: 11px;
-            color: #777;
-            margin-bottom: 2px;
-            font-weight: 500;
-        }
-        .bubble-date {
-            font-size: 10px;
-            color: #aaa;
-            margin-top: 2px;
         }
 
         .date-separator {
@@ -243,82 +245,7 @@
         .date-separator::before { left: 0; }
         .date-separator::after  { right: 0; }
 
-        .bubble-arrow-menu {
-            position: absolute;
-            top: 4px;
-            right: 2px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .bubble-content:hover .bubble-arrow-menu {
-            opacity: 1;
-        }
-        .bubble-arrow {
-            cursor: pointer;
-            font-size: 14px;
-            color: #555;
-            padding: 2px 5px;
-            border-radius: 4px;
-            background: rgba(255,255,255,0.75);
-            line-height: 1;
-        }
-        .bubble-arrow:hover {
-            background: rgba(0,0,0,0.08);
-        }
-        .bubble-dropdown {
-            position: absolute;
-            right: 0;
-            top: 100%;
-            min-width: 110px;
-            background: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-            z-index: 9999;
-            overflow: hidden;
-        }
-        .bubble-dropdown-item {
-            padding: 7px 14px;
-            cursor: pointer;
-            font-size: 12px;
-            color: #333;
-            transition: background 0.15s;
-        }
-        .bubble-dropdown-item:hover {
-            background: #f0f4f8;
-        }
 
-        .bubble-edit-container {
-            margin-top: 4px;
-        }
-        .bubble-edit-container .ql-container {
-            border-radius: 6px;
-            font-size: 13px;
-        }
-        .bubble-save-btn,
-        .bubble-cancel-btn {
-            margin-top: 4px;
-            margin-right: 4px;
-            padding: 4px 12px;
-            font-size: 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .bubble-save-btn {
-            background: #0084ff;
-            color: #fff;
-        }
-        .bubble-save-btn:hover {
-            background: #006ad8;
-        }
-        .bubble-cancel-btn {
-            background: #e0e0e0;
-            color: #333;
-        }
-        .bubble-cancel-btn:hover {
-            background: #cfcfcf;
-        }
     </style>
 </div>
 
@@ -364,10 +291,11 @@
                 buttonAdd.addEventListener('click', function() {
                     var html = quill.root.innerHTML;
                     var text = quill.getText().trim();
-                    if (text === ""){
+
+                    if (text === "" && quill.getLength() <= 1) {
                         alert("note can't be empty");
                         return;
-                    };
+                    }
                     var newNote = {
                         username: userName,
                         name: displayName,
@@ -398,9 +326,6 @@
 
                     renderNotes(jsonNotes);
                     quill.setContents([]);
-                    document.querySelectorAll('.bubble-dropdown').forEach(function(d) {
-                        d.style.display = 'none';
-                    });
                 });
             }
         }
@@ -425,100 +350,18 @@
                     container.appendChild(separator);
                 }
 
-                var dropdownHtml = '';
-                if(note.username === userName){
-                    dropdownHtml =
-                        '<div class="bubble-arrow-menu">' +
-                            '<span class="bubble-arrow">&#9662;</span>' +
-                            '<div class="bubble-dropdown" style="display:none">' +
-                                '<div class="bubble-dropdown-item" data-action="edit" data-id="' + note.id + '">Edit</div>' +
-                                '<div class="bubble-dropdown-item" data-action="delete" data-id="' + note.id + '">Delete</div>' +
-                            '</div>' +
-                        '</div>'
-                }
-
                 item.innerHTML =
-                    '<div class="note-bubble ' + (note.username === userName ? 'bubble-right' : 'bubble-left') + '">' +
-                        '<small class="bubble-name">' + note.name + '</small>' +
-                        '<div class="bubble-content">'
-                            + note.notes + dropdownHtml +
+                    '<div class="note-bubble ' + (note.username === userName ? 'bubble-mine' : 'bubble-others') + '">' +
+                        '<div class="bubble-content">' +
+                            '<div class="bubble-header">' +
+                                '<span class="bubble-name">' + note.name + '</span>' +
+                                '<span class="bubble-date">' + date + '</span>' +
+                            '</div>' +
+                            '<div class="bubble-body">' + note.notes + '</div>' +
                         '</div>' +
-                        '<div class="bubble-edit-container" style="display:none">' +
-                            '<div class="bubble-edit-editor"></div>' +
-                            '<button type="button" class="bubble-save-btn">Save</button>' +
-                            '<button type="button" class="bubble-cancel-btn">Cancel</button>' +
-                        '</div>' +
-                        '<small class="bubble-date">' + date + '</small>' +
                     '</div>';
                 container.appendChild(item);
 
-                var dBtn = item.querySelector('.bubble-arrow');
-                var bDropdown = item.querySelector('.bubble-dropdown');
-
-                if (dBtn) {
-                    dBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        bDropdown.style.display = bDropdown.style.display === 'none' ? 'block' : 'none';
-                    });
-                }
-
-                var dropdown = item.querySelector('.bubble-dropdown');
-
-                if(dropdown) {
-                    dropdown.addEventListener('click', function(e) {
-                        var action = e.target.dataset.action;
-                        var id = e.target.dataset.id;
-                        var now = new Date();
-                        if(isWithin30Minutes(now, new Date(note.date))) {
-                            if (action === 'delete') {
-                                if (!confirm('Delete this note?')) return;
-                                var index = jsonNotes.findIndex(function(n) {
-                                    return n.id === id;
-                                });
-
-                                if (index !== -1) {
-                                    jsonNotes.splice(index, 1);
-                                }
-
-                                document.getElementById(paramName).value = JSON.stringify(jsonNotes);
-                                renderNotes(jsonNotes);
-                            }
-                            if (action === 'edit') {
-                                var content = item.querySelector('.bubble-content');
-                                var editContainer = item.querySelector('.bubble-edit-container');
-                                var editEditor = item.querySelector('.bubble-edit-editor');
-
-                                var editQuill = new Quill(editEditor, {
-                                    theme: 'snow',
-                                    modules: { toolbar: false }
-                                });
-
-                                editQuill.root.innerHTML = note.notes;
-
-                                content.style.display = 'none';
-                                editContainer.style.display = 'block';
-
-                                item.querySelector('.bubble-save-btn').addEventListener('click', function() {
-                                    var index = jsonNotes.findIndex(function(n) {
-                                        return n.id === note.id;
-                                    });
-                                    if (index !== -1) {
-                                        jsonNotes[index].notes = editQuill.root.innerHTML;
-                                    }
-                                    document.getElementById(paramName).value = JSON.stringify(jsonNotes);
-                                    renderNotes(jsonNotes);
-                                });
-
-                                item.querySelector('.bubble-cancel-btn').addEventListener('click', function() {
-                                    content.style.display = 'block';
-                                    editContainer.style.display = 'none';
-                                });
-                            }
-                        } else {
-                            alert('Cannot edit or delete after 30 minutes!');
-                        }
-                    });
-                }
 
                 item.querySelectorAll('img').forEach(function(img) {
                     img.style.cursor = 'pointer';
