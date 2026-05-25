@@ -1,0 +1,13 @@
+[
+  {
+    "title": "Notes Binder",
+    "properties": [
+      {
+        "name": "notesFormDefId",
+        "label": "Notes Form ID",
+        "type": "textfield",
+        "description": "Form ID tabel notes terpisah (contoh: t_notes_table)"
+      }
+    ]
+  }
+]

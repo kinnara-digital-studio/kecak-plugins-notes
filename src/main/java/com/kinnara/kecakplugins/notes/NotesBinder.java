@@ -21,11 +21,25 @@ public class NotesBinder extends FormBinder implements
     private final static String LABEL = "Notes Binder";
 
     @Override
+    public String getPropertyOptions() {
+        return AppUtil.readPluginResource(getClass().getName(), "/properties/NotesBinder.json");
+    }
+
+    @Override
     public FormRowSet load(Element element, String s, FormData formData) {
-        FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
-        String notesFormDefId = element.getPropertyString("notesFormDefId");
+        String notesFormDefId = getPropertyString("notesFormDefId");
+        //LogUtil.info(getClassName(), "form id: " + notesFormDefId);
         Form notesForm = generateForm(notesFormDefId);
+
+        if (notesForm == null || notesFormDefId.isEmpty()){
+            FormRowSet emptyRowSet = new FormRowSet();
+            emptyRowSet.setMultiRow(true);
+            return emptyRowSet;
+        }
+
+        FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
         FormRowSet rowSet = formDataDao.find(notesForm, "WHERE c_record_id = ?", new Object[]{s}, "date", false, null, null);
+
         if(rowSet != null) {
             rowSet.setMultiRow(true);
         }
@@ -35,34 +49,23 @@ public class NotesBinder extends FormBinder implements
     @Override
     public FormRowSet store(Element element, FormRowSet formRowSet, FormData formData) {
         LogUtil.info(getClassName(), "NotesBinder.store() called, formRowSet Size: " + formRowSet.size());
-
-        for (int i = 0; i < formRowSet.size(); i++) {
-            FormRow row = formRowSet.get(i);
-            LogUtil.info(getClassName(), "=== Baris ke-" + (i + 1) + " (ID Note: " + row.getId() + ") ===");
-
-            // Looping untuk membedah semua nama kolom dan value-nya
-            for (String columnName : row.stringPropertyNames()) {
-                String value = row.getProperty(columnName);
-                LogUtil.info(getClassName(), "  -> Kolom [" + columnName + "] = " + value);
-            }
-        }
-
-        FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
-
-        String notesFormDefId = element.getPropertyString("notesFormDefId");
+        String notesFormDefId = getPropertyString("notesFormDefId");
+        //LogUtil.info(getClassName(), "form id: " + notesFormDefId);
         Form notesForm = generateForm(notesFormDefId);
 
-        if(notesForm == null) {
-            LogUtil.warn(getClassName(), "notesForm null! cek notesFormDefId: " + notesFormDefId);
+        if (notesForm == null || notesFormDefId.isEmpty()){
+
             return formRowSet;
         }
 
+        FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
         try {
             formDataDao.saveOrUpdate(notesForm, formRowSet);
             LogUtil.info(getClassName(), "Sukses menyimpan " + formRowSet.size() + " notes ke database.");
         } catch (Exception e) {
             LogUtil.error(getClassName(), e, "save failed, error: " + e);
         }
+
         return formRowSet;
     }
 
@@ -76,10 +79,7 @@ public class NotesBinder extends FormBinder implements
         return getClass().getName();
     }
 
-    @Override
-    public String getPropertyOptions() {
-        return null;
-    }
+
 
     @Override
     public String getName() {
