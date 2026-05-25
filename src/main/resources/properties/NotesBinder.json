@@ -6,7 +6,54 @@
         "name": "notesFormDefId",
         "label": "Notes Form ID",
         "type": "textfield",
+        "required" : "true",
         "description": "Form ID tabel notes terpisah (contoh: t_notes_table)"
+      },
+      {
+        "label": "Notes Form Field Id",
+        "type": "header"
+      },
+      {
+        "name": "fieldRecordId",
+        "label": "Field: Record ID",
+        "type": "textfield",
+        "value": "record_id",
+        "required" : "true"
+      },
+      {
+        "name": "fieldUsername",
+        "label": "Field: Username",
+        "type": "textfield",
+        "value": "username",
+        "required" : "true"
+      },
+      {
+        "name": "fieldName",
+        "label": "Field: Name",
+        "type": "textfield",
+        "value": "name",
+        "required" : "true"
+      },
+      {
+        "name": "fieldNotes",
+        "label": "Field: Notes Content",
+        "type": "textfield",
+        "value": "notes",
+        "required" : "true"
+      },
+      {
+        "name": "fieldDate",
+        "label": "Field: Date",
+        "type": "textfield",
+        "value": "date",
+        "required" : "true"
+      },
+      {
+        "name": "fieldType",
+        "label": "Field: Type",
+        "type": "textfield",
+        "value": "type",
+        "required" : "true"
       }
     ]
   }

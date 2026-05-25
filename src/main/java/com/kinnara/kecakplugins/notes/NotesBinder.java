@@ -54,7 +54,6 @@ public class NotesBinder extends FormBinder implements
         Form notesForm = generateForm(notesFormDefId);
 
         if (notesForm == null || notesFormDefId.isEmpty()){
-
             return formRowSet;
         }
 
@@ -65,7 +64,6 @@ public class NotesBinder extends FormBinder implements
         } catch (Exception e) {
             LogUtil.error(getClassName(), e, "save failed, error: " + e);
         }
-
         return formRowSet;
     }
 

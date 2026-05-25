@@ -11,57 +11,58 @@
         <#if isReadOnlyLabel!false>
             <div id="note-list-${elementParamName!}" class="note-list-container"></div>
         <#else>
-            <div class="notes-editor-wrapper">
-                <div id="toolbar-container-${elementParamName!}" class="notes-toolbar">
-                    <span class="ql-formats">
-                        <select class="ql-font"></select>
-                        <select class="ql-header">
-                            <option value="1">Heading 1</option>
-                            <option value="2">Heading 2</option>
-                            <option selected>Normal</option>
-                        </select>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-bold"></button>
-                        <button class="ql-italic"></button>
-                        <button class="ql-underline"></button>
-                        <button class="ql-strike"></button>
-                    </span>
-                    <span class="ql-formats">
-                        <select class="ql-color"></select>
-                        <select class="ql-background"></select>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-list" value="ordered"></button>
-                        <button class="ql-list" value="bullet"></button>
-                        <button class="ql-indent" value="-1"></button>
-                        <button class="ql-indent" value="+1"></button>
-                    </span>
-                    <#--  <span class="ql-formats">
-                        <button class="ql-direction" value="rtl"></button>
-                        <select class="ql-align"></select>
-                    </span>  -->
-                    <span class="ql-formats">
-                        <button class="ql-link"></button>
-                        <button class="ql-image"></button>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-clean"></button>
-                    </span>
+            <div class="editor-row-container">
+                <div class="notes-editor-wrapper">
+                    <div id="toolbar-container-${elementParamName!}" class="notes-toolbar">
+                        <span class="ql-formats">
+                            <select class="ql-font"></select>
+                            <select class="ql-header">
+                                <option value="1">Heading 1</option>
+                                <option value="2">Heading 2</option>
+                                <option selected>Normal</option>
+                            </select>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-bold"></button>
+                            <button class="ql-italic"></button>
+                            <button class="ql-underline"></button>
+                            <button class="ql-strike"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <select class="ql-color"></select>
+                            <select class="ql-background"></select>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-list" value="ordered"></button>
+                            <button class="ql-list" value="bullet"></button>
+                            <button class="ql-indent" value="-1"></button>
+                            <button class="ql-indent" value="+1"></button>
+                        </span>
+                        <#--  <span class="ql-formats">
+                            <button class="ql-direction" value="rtl"></button>
+                            <select class="ql-align"></select>
+                        </span>  -->
+                        <span class="ql-formats">
+                            <button class="ql-link"></button>
+                            <button class="ql-image"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-clean"></button>
+                        </span>
+                    </div>
+                    <div id="notes-editor-${elementParamName!}" class="notes-editor-area"></div>
                 </div>
-                <div id="notes-editor-${elementParamName!}" class="notes-editor-area"></div>
+                <#if !(isReadOnly!false)>
+                    <button type="button" id="btn-add-${elementParamName!}" class="save-note-btn" title="Save Note">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                    </button>
+                </#if>
             </div>
-            <#if !(isReadOnly!false)>
-                <button type="button" id="btn-add-${elementParamName!}" class="add-note-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                         style="vertical-align: middle; margin-right: 4px;">
-                        <path d="M22 2L11 13"/>
-                        <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
-                    </svg>
-                    Add Note
-                </button>
-            </#if>
             <div id="note-list-${elementParamName!}" class="note-list-container"></div>
         </#if>
     </div>
@@ -70,7 +71,14 @@
         .form-cell:has(.notes-element-wrapper) {
             overflow: visible !important;
         }
+        .editor-row-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            width: 100%;
+        }
         .notes-editor-wrapper {
+            flex: 1;
             border: 1px solid #ccc;
             border-radius: 6px;
             overflow: hidden;
@@ -116,26 +124,26 @@
             overflow: visible !important;
         }
 
-        .add-note-btn {
+        .save-note-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-top: 10px;
-            padding: 7px 18px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #fff !important;
-            background: #0084ff !important;
-            border: none;
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            color: #111 !important;
+            background: #fff !important;
+            border: 1px solid #111;
             border-radius: 6px;
             cursor: pointer;
             transition: background 0.2s, box-shadow 0.2s;
+            margin-bottom: 2px;
         }
-        .add-note-btn:hover {
+        .save-note-btn:hover {
             background: #006ad8 !important;
             box-shadow: 0 2px 6px rgba(0,132,255,0.3);
         }
-        .add-note-btn:active {
+        .save-note-btn:active {
             background: #0056b3 !important;
         }
 
@@ -180,7 +188,7 @@
             border: 1px solid #e0e0e0;
         }
         .bubble-others .bubble-content {
-            background: #ffffff !important;
+            background: #eee !important;
             color: #111 !important;
             border: 1px solid #e0e0e0;
         }
@@ -192,7 +200,6 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 6px;
-            border-bottom: 1px solid #111;
         }
         .bubble-mine .bubble-header .bubble-name {
             color: #fff;
@@ -201,7 +208,7 @@
             color: #e0e0e0;
         }
         .bubble-others .bubble-header .bubble-name {
-            color: #333;
+            color: #111;
         }
         .bubble-others .bubble-header .bubble-date {
             color: #888;
