@@ -340,7 +340,6 @@
             display: inline-block;
             vertical-align: middle;
             margin-left: 6px;
-            animation: spinAnimation 2s linear infinite;
         }
         .bubble-mine .icon-pending {
             color: #fff;
