@@ -29,7 +29,7 @@
       },
       {
         "name": "readonlyLabel",
-        "label": "readonly as Label",
+        "label": "Read Only as Label",
         "type": "checkbox",
         "options": [
           {

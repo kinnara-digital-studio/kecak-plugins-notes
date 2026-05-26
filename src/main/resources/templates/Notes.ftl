@@ -200,6 +200,7 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 6px;
+            padding-right: 10px;
         }
         .bubble-mine .bubble-header .bubble-name {
             color: #fff;
@@ -334,6 +335,17 @@
         .bubble-cancel-btn:hover {
             background: #cfcfcf;
         }
+
+        .icon-pending {
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 6px;
+            animation: spinAnimation 2s linear infinite;
+        }
+        .bubble-mine .icon-pending {
+            color: #fff;
+        }
+
     </style>
 </div>
 
@@ -451,12 +463,20 @@
                         '</div>'
                 }
 
+                //var bubbleState = isSaved ? ' bubble-saved' : ' bubble-unsaved';
+
                 item.innerHTML =
                     '<div class="note-bubble ' + (note.username === userName ? 'bubble-mine' : 'bubble-others') + '">' +
                         '<div class="bubble-content">' +
                             '<div class="bubble-header">' +
                                 '<span class="bubble-name">' + note.name + '</span>' +
                                 '<span class="bubble-date">' + date + '</span>' +
+                                (!isSaved ?
+                                    '<svg class="icon-pending" title="Unsaved" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+                                        '<circle cx="12" cy="12" r="10"></circle>' +
+                                        '<polyline points="12 6 12 12 16 14"></polyline>' +
+                                    '</svg>'
+                                : '') +
                             '</div>' +
                             '<div class="bubble-body-row">' +
                                 dropdownHtml +

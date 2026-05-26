@@ -5,8 +5,9 @@
       {
         "name": "notesFormDefId",
         "label": "Notes Form ID",
-        "type": "textfield",
+        "type" : "selectbox",
         "required" : "true",
+        "options_ajax" : "[CONTEXT_PATH]/web/json/console/app[APP_PATH]/forms/options",
         "description": "Form ID tabel notes terpisah (contoh: t_notes_table)"
       },
       {
