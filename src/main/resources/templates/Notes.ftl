@@ -252,7 +252,88 @@
         .date-separator::before { left: 0; }
         .date-separator::after  { right: 0; }
 
+        .bubble-body-row {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 4px;
+        }
+        .bubble-arrow-menu {
+            position: absolute;
+            right: 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+        .bubble-content:hover .bubble-arrow-menu {
+            opacity: 1;
+        }
+        .bubble-arrow {
+            cursor: pointer;
+            font-size: 14px;
+            color: #555;
+            padding: 2px 5px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.75);
+            line-height: 1;
+        }
+        .bubble-arrow:hover {
+            background: rgba(0,0,0,0.08);
+        }
+        .bubble-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            min-width: 110px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            z-index: 9999;
+            overflow: hidden;
+        }
+        .bubble-dropdown-item {
+            padding: 7px 14px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #333;
+            transition: background 0.15s;
+        }
+        .bubble-dropdown-item:hover {
+            background: #f0f4f8;
+        }
 
+        .bubble-edit-container {
+            margin-top: 4px;
+        }
+        .bubble-edit-container .ql-container {
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .bubble-save-btn,
+        .bubble-cancel-btn {
+            margin-top: 4px;
+            margin-right: 4px;
+            padding: 4px 12px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .bubble-save-btn {
+            background: #0084ff;
+            color: #fff;
+        }
+        .bubble-save-btn:hover {
+            background: #006ad8;
+        }
+        .bubble-cancel-btn {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .bubble-cancel-btn:hover {
+            background: #cfcfcf;
+        }
     </style>
 </div>
 
@@ -338,7 +419,6 @@
         }
 
         renderNotes(jsonNotes);
-
         function renderNotes(notes) {
             var container = document.getElementById('note-list-' + paramName);
             container.innerHTML = '';
@@ -357,6 +437,20 @@
                     container.appendChild(separator);
                 }
 
+                var isSaved = note.id && note.id !== '';
+
+                var dropdownHtml = '';
+                if(note.username === userName && !isSaved){
+                    dropdownHtml =
+                        '<div class="bubble-arrow-menu">' +
+                            '<span class="bubble-arrow">&#9662;</span>' +
+                            '<div class="bubble-dropdown" style="display:none">' +
+                                '<div class="bubble-dropdown-item" data-action="edit" data-id="' + note.id + '">Edit</div>' +
+                                '<div class="bubble-dropdown-item" data-action="delete" data-id="' + note.id + '">Delete</div>' +
+                            '</div>' +
+                        '</div>'
+                }
+
                 item.innerHTML =
                     '<div class="note-bubble ' + (note.username === userName ? 'bubble-mine' : 'bubble-others') + '">' +
                         '<div class="bubble-content">' +
@@ -364,11 +458,82 @@
                                 '<span class="bubble-name">' + note.name + '</span>' +
                                 '<span class="bubble-date">' + date + '</span>' +
                             '</div>' +
-                            '<div class="bubble-body">' + note.notes + '</div>' +
+                            '<div class="bubble-body-row">' +
+                                dropdownHtml +
+                                '<div class="bubble-body">' + note.notes + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="bubble-edit-container" style="display:none">' +
+                            '<div class="bubble-edit-editor"></div>' +
+                            '<button type="button" class="bubble-save-btn">Save</button>' +
+                            '<button type="button" class="bubble-cancel-btn">Cancel</button>' +
                         '</div>' +
                     '</div>';
                 container.appendChild(item);
 
+                var dBtn = item.querySelector('.bubble-arrow');
+                var bDropdown = item.querySelector('.bubble-dropdown');
+
+                if (dBtn) {
+                    dBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        bDropdown.style.display = bDropdown.style.display === 'none' ? 'block' : 'none';
+                    });
+                }
+
+                var dropdown = item.querySelector('.bubble-dropdown');
+
+                if(dropdown) {
+                    dropdown.addEventListener('click', function(e) {
+                        var action = e.target.dataset.action;
+                        var id = e.target.dataset.id;
+                        var now = new Date();
+                        if (action === 'delete') {
+                            if (!confirm('Delete this note?')) return;
+                            var index = jsonNotes.findIndex(function(n) {
+                                return n.date === note.date && n.username === note.username;
+                            });
+
+                            if (index !== -1) {
+                                jsonNotes.splice(index, 1);
+                            }
+
+                            document.getElementById(paramName).value = JSON.stringify(jsonNotes);
+                            renderNotes(jsonNotes);
+                        }
+                        if (action === 'edit') {
+                            var content = item.querySelector('.bubble-content');
+                            var editContainer = item.querySelector('.bubble-edit-container');
+                            var editEditor = item.querySelector('.bubble-edit-editor');
+
+                            var editQuill = new Quill(editEditor, {
+                                theme: 'snow',
+                                modules: { toolbar: false }
+                            });
+
+                            editQuill.root.innerHTML = note.notes;
+
+                            content.style.display = 'none';
+                            editContainer.style.display = 'block';
+
+                            item.querySelector('.bubble-save-btn').addEventListener('click', function() {
+                                var index = jsonNotes.findIndex(function(n) {
+                                    return n.id === note.id;
+                                });
+                                if (index !== -1) {
+                                    jsonNotes[index].notes = editQuill.root.innerHTML;
+                                }
+                                document.getElementById(paramName).value = JSON.stringify(jsonNotes);
+                                renderNotes(jsonNotes);
+                            });
+
+                            item.querySelector('.bubble-cancel-btn').addEventListener('click', function() {
+                                content.style.display = 'block';
+                                editContainer.style.display = 'none';
+                            });
+                        }
+                    });
+                }
 
                 item.querySelectorAll('img').forEach(function(img) {
                     img.style.cursor = 'pointer';
