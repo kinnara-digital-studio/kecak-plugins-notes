@@ -430,6 +430,9 @@
         }
 
         renderNotes(jsonNotes);
+        setTimeout(scrollFormToTop, 50);
+
+
         function renderNotes(notes) {
             var container = document.getElementById('note-list-' + paramName);
             container.innerHTML = '';
@@ -593,6 +596,15 @@
         function isWithin30Minutes(date1, date2) {
             let diffInMs = Math.abs(date1 - date2);
             return diffInMs < 30 * 60 * 1000;
+        }
+
+        function scrollFormToTop() {
+            var formCell = document.getElementById('note-list-' + paramName);
+            if (formCell) {
+                formCell.closest('.form-cell').scrollIntoView({ block: 'start', behavior: 'instant' });
+            } else {
+                window.scrollTo(0, 0);
+            }
         }
 
     })();
