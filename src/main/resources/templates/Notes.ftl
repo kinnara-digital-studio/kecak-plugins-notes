@@ -183,9 +183,9 @@
             border-radius: 8px !important;
         }
         .bubble-mine .bubble-content {
-            background: #0d6efd !important;
-            color: #fff !important;
-            border: 1px solid #e0e0e0;
+            background: var(--notes-primary-color, #0d6efd) !important;
+            color: var(--notes-primary-text, #fff) !important;
+            border: 1px solid rgba(0,0,0,0.1);
         }
         .bubble-others .bubble-content {
             background: #eee !important;
@@ -203,10 +203,11 @@
             padding-right: 10px;
         }
         .bubble-mine .bubble-header .bubble-name {
-            color: #fff;
+            color: var(--notes-primary-text, #fff);
         }
         .bubble-mine .bubble-header .bubble-date {
-            color: #e0e0e0;
+            color: var(--notes-primary-text, #e0e0e0);
+            opacity: 0.75;
         }
         .bubble-others .bubble-header .bubble-name {
             color: #111;
@@ -226,8 +227,26 @@
             height: auto;
             border-radius: 6px;
         }
+        .bubble-body {
+            color: inherit;
+        }
         .bubble-body p {
             margin: 0 0 4px 0;
+            color: inherit;
+        }
+        .bubble-body a {
+            color: inherit;
+            text-decoration: underline;
+        }
+        .bubble-mine .bubble-body,
+        .bubble-mine .bubble-body p,
+        .bubble-mine .bubble-body span,
+        .bubble-mine .bubble-body li,
+        .bubble-mine .bubble-body a,
+        .bubble-mine .bubble-body strong,
+        .bubble-mine .bubble-body em,
+        .bubble-mine .bubble-body u {
+            color: var(--notes-primary-text, #fff) !important;
         }
         .bubble-body p:last-child {
             margin-bottom: 0;
@@ -353,6 +372,74 @@
 
 <script type="text/javascript">
     (function(){
+        // === Detect Kecak/Joget primary color from themed elements ===
+        function detectPrimaryColor() {
+            // List of selectors commonly themed by Kecak/Joget with primary color
+            var selectors = [
+                '#sidebar',
+                '.sidebar',
+                '.page-header',
+                '.navbar',
+                '.navbar-header',
+                'nav.navbar',
+                '.navbar-default .navbar-brand',
+                '#header',
+                '.header',
+                '.main-header',
+                '.nav-header',
+                '.sidebar-nav',
+                '.left-sidebar',
+                '#left-panel',
+                '.topbar',
+                '.top-bar',
+                '.btn-primary'
+            ];
+            for (var i = 0; i < selectors.length; i++) {
+                var el = document.querySelector(selectors[i]);
+                if (el) {
+                    var bg = window.getComputedStyle(el).backgroundColor;
+                    // Skip transparent, white, or near-white backgrounds
+                    if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent' && bg !== 'rgb(255, 255, 255)' && bg !== 'rgb(248, 249, 250)' && bg !== 'rgb(245, 245, 245)') {
+                        return bg;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Calculate contrasting text color (white or dark) based on background luminance
+        function getContrastText(rgbStr) {
+            var match = rgbStr.match(/\d+/g);
+            if (!match || match.length < 3) return '#fff';
+            var r = parseInt(match[0]), g = parseInt(match[1]), b = parseInt(match[2]);
+            // Relative luminance formula (sRGB)
+            var luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            return luminance > 0.5 ? '#111' : '#fff';
+        }
+
+        function applyPrimaryColor() {
+            var color = detectPrimaryColor();
+            if (color) {
+                var textColor = getContrastText(color);
+                var wrappers = document.querySelectorAll('.notes-element-wrapper');
+                wrappers.forEach(function(w) {
+                    w.style.setProperty('--notes-primary-color', color);
+                    w.style.setProperty('--notes-primary-text', textColor);
+                });
+            }
+        }
+
+        // Run detection after a short delay to ensure theme styles are loaded
+        if (document.readyState === 'complete') {
+            applyPrimaryColor();
+        } else {
+            window.addEventListener('load', applyPrimaryColor);
+        }
+        // Also try immediately in case elements are already rendered
+        setTimeout(applyPrimaryColor, 100);
+        setTimeout(applyPrimaryColor, 500);
+        // === End primary color detection ===
+
         var paramName = '${elementParamName!}'
 
         var userName = '${userName}';

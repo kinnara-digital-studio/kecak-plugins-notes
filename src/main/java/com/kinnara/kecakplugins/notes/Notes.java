@@ -106,11 +106,11 @@ public class Notes extends Element implements FormBuilderPaletteElement {
                         formRow.setId(noteId);
                         formRow.put("id", noteId);
                         formRow.put(record_id, primaryKey);
-                        formRow.put(username, note.optString(username));
-                        formRow.put(name, note.optString(name));
-                        formRow.put(date, note.optString(date));
-                        formRow.put(notes, note.optString(notes));
-                        formRow.put(type, note.optString(type, "note"));
+                        formRow.put(username, note.optString("username"));
+                        formRow.put(name, note.optString("name"));
+                        formRow.put(date, note.optString("date"));
+                        formRow.put(notes, note.optString("notes"));
+                        formRow.put(type, note.optString("type", "note"));
 
                         formRowSet.add(formRow);
                     }
@@ -160,12 +160,12 @@ public class Notes extends Element implements FormBuilderPaletteElement {
                     try {
                         org.json.JSONObject jsonObject = new org.json.JSONObject();
                         jsonObject.put("id", row.getId());
-                        jsonObject.put(record_id, row.getProperty(record_id));
-                        jsonObject.put(username, row.getProperty(username));
-                        jsonObject.put(name, row.getProperty(name));
-                        jsonObject.put(date, row.getProperty(date));
-                        jsonObject.put(notes, row.getProperty(notes));
-                        jsonObject.put(type, row.getProperty(type));
+                        jsonObject.put("record_id", row.getProperty(record_id));
+                        jsonObject.put("username", row.getProperty(username));
+                        jsonObject.put("name", row.getProperty(name));
+                        jsonObject.put("date", row.getProperty(date));
+                        jsonObject.put("notes", row.getProperty(notes));
+                        jsonObject.put("type", row.getProperty(type));
                         jsonArray.put(jsonObject);
                     } catch (Exception e){
                         LogUtil.error(getClassName(), e, "error: " + e);
