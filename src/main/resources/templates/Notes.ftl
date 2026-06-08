@@ -355,13 +355,18 @@
             background: #cfcfcf;
         }
 
+        @keyframes spin-clock {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         .icon-pending {
             display: inline-block;
             vertical-align: middle;
             margin-left: 6px;
+            animation: spin-clock 2s linear infinite;
         }
         .bubble-mine .icon-pending {
-            color: #fff;
+            color: var(--notes-primary-text, #fff);
         }
 
     </style>
@@ -482,34 +487,20 @@
                         alert("note can't be empty");
                         return;
                     }
-                    var newNote = {
-                        username: userName,
+
+                    var uiNote = {
+                        id: '',
+                        tempId: 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
                         name: displayName,
-                        date: new Date().toISOString(),
+                        username: userName,
+                        dateLabel: 'Today',
+                        dateStr: new Date().toLocaleDateString(),
                         notes: html,
                         type: 'note'
                     };
-                    if (isMultirow) {
-                        newNote.record_id = primaryKey;
-                    }
-                    //console.log('[Notes DEBUG] newNote:', JSON.stringify(newNote));
+                    jsonNotes.push(uiNote);
 
-                    jsonNotes.push(newNote);
-                    //console.log('[Notes DEBUG] Add clicked! jsonNotes.length after push:', jsonNotes.length);
-                    //console.log('[Notes DEBUG] jsonNotes:', JSON.stringify(jsonNotes));
-
-                    var targetInput = document.getElementById(paramName);
-                    //console.log('[Notes DEBUG] targetInput found:', !!targetInput);
-
-                    targetInput.value = JSON.stringify(jsonNotes);
-                    //console.log('[Notes DEBUG] Value SET. Length of value string:', targetInput.value.length);
-
-                    var allInputs = document.querySelectorAll('input[type="hidden"][name="' + paramName + '"]');
-                    //console.log('[Notes DEBUG] Updating ALL hidden inputs, count:', allInputs.length);
-                    allInputs.forEach(function(inp) {
-                        inp.value = JSON.stringify(jsonNotes);
-                    });
-
+                    updatePayload();
                     renderNotes(jsonNotes);
                     quill.setContents([]);
                 });
@@ -519,6 +510,28 @@
         renderNotes(jsonNotes);
         setTimeout(scrollFormToTop, 50);
 
+        function updatePayload() {
+            var payloadValue = "";
+            if (!isMultirow) {
+                payloadValue = JSON.stringify(jsonNotes);
+            } else {
+                var pending = jsonNotes.filter(function(n) {
+                    return !n.id || n.id === '';
+                }).map(function(n) {
+                    return {
+                        notes: n.notes,
+                        type: n.type || 'note'
+                    };
+                });
+                payloadValue = JSON.stringify(pending);
+            }
+
+            var allInputs = document.querySelectorAll('input[type="hidden"][name="' + paramName + '"]');
+            allInputs.forEach(function(inp) {
+                inp.value = payloadValue;
+            });
+            console.log('[Notes DEBUG] Payload Updated:', payloadValue);
+        }
 
         function renderNotes(notes) {
             var container = document.getElementById('note-list-' + paramName);
@@ -528,13 +541,15 @@
 
             notes.slice().reverse().forEach(function(note) {
                 var item = document.createElement('div');
-                var noteDate = new Date(note.date).toDateString();
-                var date = new Date(note.date).toLocaleString('id-ID');
-                if (noteDate !== lastDate) {
+                
+                var noteDate = note.dateLabel || '';
+                var dateString = note.dateStr || '';
+
+                if (noteDate !== lastDate && noteDate !== '') {
                     lastDate = noteDate;
                     var separator = document.createElement('div');
                     separator.className = 'date-separator';
-                    separator.textContent = getDateLabel(noteDate);
+                    separator.textContent = noteDate;
                     container.appendChild(separator);
                 }
 
@@ -546,8 +561,8 @@
                         '<div class="bubble-arrow-menu">' +
                             '<span class="bubble-arrow">&#9662;</span>' +
                             '<div class="bubble-dropdown" style="display:none">' +
-                                '<div class="bubble-dropdown-item" data-action="edit" data-id="' + note.id + '">Edit</div>' +
-                                '<div class="bubble-dropdown-item" data-action="delete" data-id="' + note.id + '">Delete</div>' +
+                                '<div class="bubble-dropdown-item" data-action="edit">Edit</div>' +
+                                '<div class="bubble-dropdown-item" data-action="delete">Delete</div>' +
                             '</div>' +
                         '</div>'
                 }
@@ -559,7 +574,7 @@
                         '<div class="bubble-content">' +
                             '<div class="bubble-header">' +
                                 '<span class="bubble-name">' + note.name + '</span>' +
-                                '<span class="bubble-date">' + date + '</span>' +
+                                (isSaved ? '<span class="bubble-date">' + dateString + '</span>' : '') +
                                 (!isSaved ?
                                     '<svg class="icon-pending" title="Unsaved" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
                                         '<circle cx="12" cy="12" r="10"></circle>' +
@@ -600,14 +615,14 @@
                         if (action === 'delete') {
                             if (!confirm('Delete this note?')) return;
                             var index = jsonNotes.findIndex(function(n) {
-                                return n.date === note.date && n.username === note.username;
+                                return n.tempId === note.tempId;
                             });
 
                             if (index !== -1) {
                                 jsonNotes.splice(index, 1);
                             }
 
-                            document.getElementById(paramName).value = JSON.stringify(jsonNotes);
+                            updatePayload();
                             renderNotes(jsonNotes);
                         }
                         if (action === 'edit') {
@@ -627,12 +642,12 @@
 
                             item.querySelector('.bubble-save-btn').addEventListener('click', function() {
                                 var index = jsonNotes.findIndex(function(n) {
-                                    return n.id === note.id;
+                                    return n.tempId === note.tempId;
                                 });
                                 if (index !== -1) {
                                     jsonNotes[index].notes = editQuill.root.innerHTML;
                                 }
-                                document.getElementById(paramName).value = JSON.stringify(jsonNotes);
+                                updatePayload();
                                 renderNotes(jsonNotes);
                             });
 
@@ -668,17 +683,7 @@
             });
         }
 
-        function getDateLabel(dateStr) {
-            var today = new Date().toDateString();
-            var yesterday = new Date(Date.now() - 86400000).toDateString();
 
-            if (dateStr === today) return 'Today';
-            if (dateStr === yesterday) return 'Yesterday';
-
-            return new Date(dateStr).toLocaleDateString('id-ID', {
-                day: 'numeric', month: 'long', year: 'numeric'
-            });
-        }
 
         function isWithin30Minutes(date1, date2) {
             let diffInMs = Math.abs(date1 - date2);

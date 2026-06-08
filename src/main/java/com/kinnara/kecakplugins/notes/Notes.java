@@ -1,14 +1,15 @@
 package com.kinnara.kecakplugins.notes;
 
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.*;
 
 import com.google.gson.JsonObject;
 import org.joget.apps.app.service.AppUtil;
 import org.joget.apps.form.model.*;
 import org.joget.apps.form.service.FormUtil;
 import org.joget.commons.util.LogUtil;
+import org.joget.commons.util.TimeZoneUtil;
 import org.joget.directory.model.User;
 import org.joget.plugin.base.PluginManager;
 import org.joget.workflow.model.service.WorkflowUserManager;
@@ -75,23 +76,25 @@ public class Notes extends Element implements FormBuilderPaletteElement {
 
     @Override
     public FormRowSet formatData(FormData formData) {
-
         String id = getPropertyString(FormUtil.PROPERTY_ID);
         String value = formData.getRequestParameter(id);
         String primaryKey = formData.getPrimaryKeyValue();
 
-        FormStoreBinder storeBinder = this.getStoreBinder();
-        FormRowSet formRowSet;
-        if (storeBinder != null) {
-            formRowSet = new FormRowSet();
-            formRowSet.setMultiRow(true);
+        ApplicationContext appContext = AppUtil.getApplicationContext();
+        WorkflowUserManager workflowUserManager = (WorkflowUserManager) appContext.getBean("workflowUserManager");
+        User user = workflowUserManager.getCurrentUser();
+        String userName = user.getUsername();
+        String name = user.getFirstName() + " " + user.getLastName();
 
+        LogUtil.info(getClassName(), "value di format data: " + value);
+
+        FormStoreBinder storeBinder = this.getStoreBinder();
+        FormRowSet formRowSet = new FormRowSet();
+        formRowSet.setMultiRow(true);
+        if (storeBinder != null) {
             FormBinder binder = (FormBinder) storeBinder;
-            String record_id = binder.getPropertyString("fieldRecordId");
-            String username = binder.getPropertyString("fieldUsername");
-            String name = binder.getPropertyString("fieldName");
+            String recordId = binder.getPropertyString("fieldRecordId");
             String notes = binder.getPropertyString("fieldNotes");
-            String date = binder.getPropertyString("fieldDate");
             String type = binder.getPropertyString("fieldType");
 
             if (value != null && !value.isEmpty()) {
@@ -99,16 +102,17 @@ public class Notes extends Element implements FormBuilderPaletteElement {
                     JSONArray jsonArray = new JSONArray(value);
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject note = jsonArray.getJSONObject(i);
-                        String noteId = note.optString("id");
-                        if (noteId == null || noteId.isEmpty()) noteId = UUID.randomUUID().toString();
 
                         FormRow formRow = new FormRow();
-                        formRow.setId(noteId);
-                        formRow.put("id", noteId);
-                        formRow.put(record_id, primaryKey);
-                        formRow.put(username, note.optString("username"));
-                        formRow.put(name, note.optString("name"));
-                        formRow.put(date, note.optString("date"));
+                        formRow.setId(UUID.randomUUID().toString());
+                        formRow.put(recordId, primaryKey);
+
+                        formRow.setCreatedBy(userName);
+                        formRow.setCreatedByName(name);
+                        formRow.setDateCreated(new Date());
+
+                        LogUtil.info(getClassName(), "dateCreated: " + new Date());
+
                         formRow.put(notes, note.optString("notes"));
                         formRow.put(type, note.optString("type", "note"));
 
@@ -139,31 +143,67 @@ public class Notes extends Element implements FormBuilderPaletteElement {
 
     private String renderTemplate(String template, FormData formData, @SuppressWarnings("rawtypes") Map dataModel) {
         ApplicationContext appContext = AppUtil.getApplicationContext();
+        WorkflowUserManager workflowUserManager = (WorkflowUserManager) appContext.getBean("workflowUserManager");
+        User user = workflowUserManager.getCurrentUser();
+
         String value = "";
         formData.addRequestParameterValues("id",
                 new String[] { formData.getPrimaryKeyValue() });
-
         FormLoadBinder loadBinder = this.getLoadBinder();
+
         if (loadBinder != null) {
             FormBinder binder = (FormBinder) loadBinder;
-            String record_id = binder.getPropertyString("fieldRecordId");
-            String username = binder.getPropertyString("fieldUsername");
-            String name = binder.getPropertyString("fieldName");
+            String recordId = binder.getPropertyString("fieldRecordId");
             String notes = binder.getPropertyString("fieldNotes");
-            String date = binder.getPropertyString("fieldDate");
             String type = binder.getPropertyString("fieldType");
+
             FormRowSet rowSet = loadBinder.load(this,
                     formData.getPrimaryKeyValue(), formData);
+
             if (rowSet != null && !rowSet.isEmpty()) {
                 JSONArray jsonArray = new JSONArray();
                 rowSet.forEach(row -> {
                     try {
                         org.json.JSONObject jsonObject = new org.json.JSONObject();
                         jsonObject.put("id", row.getId());
-                        jsonObject.put("record_id", row.getProperty(record_id));
-                        jsonObject.put("username", row.getProperty(username));
-                        jsonObject.put("name", row.getProperty(name));
-                        jsonObject.put("date", row.getProperty(date));
+                        jsonObject.put("recordId", row.getProperty(recordId));
+                        jsonObject.put("username", row.getCreatedBy());
+                        jsonObject.put("name", row.getCreatedByName());
+                        Date dateCreated = row.getDateCreated();
+                        if (dateCreated != null) {
+                            if (user != null && user.getTimeZone() != null && !user.getTimeZone().trim().isEmpty()){
+                                String pattern = "dd/MM/yyyy HH:mm:ss";
+
+                                String date = TimeZoneUtil.convertToTimeZone(
+                                        dateCreated,
+                                        user.getTimeZone(),
+                                        pattern
+                                );
+                                jsonObject.put("dateStr", date);
+                            }
+                            SimpleDateFormat labelFormat = new SimpleDateFormat("dd MMMM yyyy");
+                            String dateLabel = labelFormat.format(dateCreated);
+
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTime(dateCreated);
+                            Calendar today = Calendar.getInstance();
+                            Calendar yesterday = Calendar.getInstance();
+                            yesterday.add(Calendar.DATE, -1);
+
+                            if (cal.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
+                                    cal.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)) {
+                                dateLabel = "Today";
+                            } else if (cal.get(Calendar.YEAR) == yesterday.get(Calendar.YEAR) &&
+                                    cal.get(Calendar.DAY_OF_YEAR) == yesterday.get(Calendar.DAY_OF_YEAR)) {
+                                dateLabel = "Yesterday";
+                            }
+                            jsonObject.put("dateLabel", dateLabel);
+                            jsonObject.put("date", dateCreated.toInstant().toString());
+                        } else {
+                            jsonObject.put("dateStr", "");
+                            jsonObject.put("dateLabel", "");
+                            jsonObject.put("date", "");
+                        }
                         jsonObject.put("notes", row.getProperty(notes));
                         jsonObject.put("type", row.getProperty(type));
                         jsonArray.put(jsonObject);
@@ -177,8 +217,6 @@ public class Notes extends Element implements FormBuilderPaletteElement {
             value = FormUtil.getElementPropertyValue(this, formData);
         }
 
-        WorkflowUserManager workflowUserManager = (WorkflowUserManager) appContext.getBean("workflowUserManager");
-        User user = workflowUserManager.getCurrentUser();
         String userName = user.getUsername();
         String name = user.getFirstName() + " " + user.getLastName();
 

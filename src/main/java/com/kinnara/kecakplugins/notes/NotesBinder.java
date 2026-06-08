@@ -37,14 +37,10 @@ public class NotesBinder extends FormBinder implements
             return emptyRowSet;
         }
 
-        String record_id = getPropertyString("fieldRecordId");
-        String field_date = getPropertyString("fieldDate");
-        if (field_date == null || field_date.isEmpty()) {
-            field_date = "dateCreated";
-        }
+        String recordId = getPropertyString("fieldRecordId");
 
         FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
-        FormRowSet rowSet = formDataDao.find(notesForm, "WHERE c_" + record_id + " = ?", new Object[]{s}, field_date, false, null, null);
+        FormRowSet rowSet = formDataDao.find(notesForm, "WHERE c_" + recordId + " = ?", new Object[]{s}, "dateCreated", false, null, null);
 
         if(rowSet != null) {
             rowSet.setMultiRow(true);

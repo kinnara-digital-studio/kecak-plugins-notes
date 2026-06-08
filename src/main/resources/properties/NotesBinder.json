@@ -22,31 +22,10 @@
         "required" : "true"
       },
       {
-        "name": "fieldUsername",
-        "label": "Field: Username",
-        "type": "textfield",
-        "value": "username",
-        "required" : "true"
-      },
-      {
-        "name": "fieldName",
-        "label": "Field: Name",
-        "type": "textfield",
-        "value": "name",
-        "required" : "true"
-      },
-      {
         "name": "fieldNotes",
         "label": "Field: Notes Content",
         "type": "textfield",
         "value": "notes",
-        "required" : "true"
-      },
-      {
-        "name": "fieldDate",
-        "label": "Field: Date",
-        "type": "textfield",
-        "value": "date",
         "required" : "true"
       },
       {
