@@ -4,13 +4,13 @@
     <groupId>com.kinnara.kecakplugins.notes</groupId>
     <artifactId>kecak-plugins-notes</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>3.0.0</version>
     <name>kecak-plugins-notes</name>
     <url>http://www.kecak.org</url>
     <scm>
-        <connection>scm:git:ssh://</connection>
-        <developerConnection>scm:git:ssh://</developerConnection>
-        <url>ssh://</url>
+        <connection>scm:git:ssh://git@github.com:kinnara-digital-studio/kecak-plugins-notes.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:kinnara-digital-studio/kecak-plugins-notes.git</developerConnection>
+        <url>ssh://git@github.com:kinnara-digital-studio/kecak-plugins-notes.git</url>
         <tag>HEAD</tag>
     </scm>
     <build>
@@ -148,7 +148,7 @@
         <dependency>
             <groupId>org.joget</groupId>
             <artifactId>wflow-core</artifactId>
-            <version>[7.0-SNAPSHOT],[7.0,8.0)</version>
+            <version>7.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.servlet</groupId>
