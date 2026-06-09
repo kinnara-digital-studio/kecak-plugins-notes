@@ -2,6 +2,8 @@ package com.kinnara.kecakplugins.notes.form;
 
 import com.kinnara.kecakplugins.notes.model.NoteType;
 import com.kinnara.kecakplugins.notes.model.Notes;
+import com.kinnara.kecakplugins.notes.model.NotesLoadBinder;
+import com.kinnara.kecakplugins.notes.model.NotesStoreBinder;
 import org.joget.apps.app.service.AppUtil;
 import org.joget.apps.form.model.*;
 import org.joget.apps.form.service.FormUtil;
@@ -100,8 +102,8 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
         FormRowSet formRowSet = new FormRowSet();
         formRowSet.setMultiRow(true);
 
-        if (storeBinder instanceof NotesBinder) {
-            NotesBinder binder = (NotesBinder) storeBinder;
+        if (storeBinder instanceof NotesStoreBinder) {
+            NotesStoreBinder binder = (NotesStoreBinder) storeBinder;
 
             if (value != null && !value.isEmpty()) {
                 try {
@@ -154,11 +156,12 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                 new String[]{formData.getPrimaryKeyValue()});
         FormLoadBinder loadBinder = this.getLoadBinder();
 
-        if (loadBinder instanceof NotesBinder) {
+        if (loadBinder instanceof NotesLoadBinder) {
             JSONArray jsonArray = new JSONArray();
 
-            NotesBinder binder = (NotesBinder) loadBinder;
-            FormRowSet noteList = binder.load(this, formData.getPrimaryKeyValue(), formData);
+            NotesLoadBinder binder = (NotesLoadBinder) loadBinder;
+            FormRowSet noteList = formData.getLoadBinderData(this);
+//            binder.load(this, formData.getPrimaryKeyValue(), formData);
 
             Optional.ofNullable(noteList)
                     .stream()
