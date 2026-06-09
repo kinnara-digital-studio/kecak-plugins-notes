@@ -19,6 +19,14 @@ public class Notes {
     private final NoteType type;
 
     public Notes(String id, String recordId, String username, String displayName, String note, Date date, NoteType type) {
+        assert id != null;
+        assert recordId != null;
+        assert username != null;
+        assert displayName != null;
+        assert note != null;
+        assert date != null;
+        assert type != null;
+
         this.id = id;
         this.recordId = recordId;
         this.username = username;
@@ -54,17 +62,5 @@ public class Notes {
 
     public NoteType getType() {
         return type;
-    }
-
-    public JSONObject toJson() throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", id);
-        jsonObject.put("record_id", recordId);
-        jsonObject.put("username", username);
-        jsonObject.put("name", displayName);
-        jsonObject.put("date", DATE_FORMAT.format(date));
-        jsonObject.put("notes", note);
-        jsonObject.put("type", type.name());
-        return jsonObject;
     }
 }
