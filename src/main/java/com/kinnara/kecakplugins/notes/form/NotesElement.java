@@ -119,7 +119,8 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                                 fullName,
                                 jsonNote.optString("notes"),
                                 new Date(),
-                                noteType.isEmpty() ? NoteType.NOTE : NoteType.valueOf(noteType));
+                                noteType.isEmpty() ? NoteType.NOTE : NoteType.valueOf(noteType),
+                                0);
 
                         formRowSet.add(binder.fromNote(note));
                     }
