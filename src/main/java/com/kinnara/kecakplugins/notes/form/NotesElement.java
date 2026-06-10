@@ -108,17 +108,19 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
             if (value != null && !value.isEmpty()) {
                 try {
                     JSONArray jsonArray = new JSONArray(value);
+                    long baseTimestamp = System.currentTimeMillis();
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonNote = jsonArray.getJSONObject(i);
 
                         String noteType = jsonNote.optString("type", NoteType.NOTE.name()).toUpperCase(Locale.ROOT);
+                        Date uniqueDate = new Date(baseTimestamp + i);
                         Notes note = new Notes(
                                 UUID.randomUUID().toString(),
                                 primaryKey,
                                 username,
                                 fullName,
                                 jsonNote.optString("notes"),
-                                new Date(),
+                                uniqueDate,
                                 noteType.isEmpty() ? NoteType.NOTE : NoteType.valueOf(noteType),
                                 0);
 
