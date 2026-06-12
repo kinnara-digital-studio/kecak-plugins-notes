@@ -494,14 +494,14 @@
                         name: displayName,
                         username: userName,
                         dateLabel: 'Today',
-                        dateStr: new Date().toLocaleDateString(),
+                        dateStr: new Date().toLocaleString(),
                         notes: html,
                         type: 'note'
                     };
                     jsonNotes.push(uiNote);
 
-                    updatePayload();
                     renderNotes(jsonNotes);
+                    updatePayload();
                     quill.setContents([]);
                 });
             }
@@ -514,6 +514,15 @@
             var payloadValue = "";
             if (!isMultirow) {
                 payloadValue = JSON.stringify(jsonNotes);
+                var cleaned = jsonNotes.map(function(n) {
+                    var copy = Object.assign({}, n);
+                    if (copy.tempId && (!copy.id || copy.id === '')) {
+                        copy.id = copy.tempId;
+                    }
+                    delete copy.tempId;
+                    return copy;
+                });
+                payloadValue = JSON.stringify(cleaned);
             } else {
                 var pending = jsonNotes.filter(function(n) {
                     return !n.id || n.id === '';
@@ -542,8 +551,22 @@
             notes.slice().reverse().forEach(function(note) {
                 var item = document.createElement('div');
                 
-                var noteDate = note.dateLabel || '';
-                var dateString = note.dateStr || '';
+                var dateStr = note.dateStr || '';
+                var dateLabel = note.dateLabel || '';
+                var isSaved;
+                if (isMultirow) {
+                    isSaved = note.id && note.id !== '';
+                } else {
+                    isSaved = !note.tempId;
+                    if (dateStr) {
+                        var d = new Date(dateStr);
+                        if (!isNaN(d.getTime())) {
+                            dateLabel = getDateLabel(d.toDateString());
+                        }
+                    }
+                }
+
+                var noteDate = dateLabel;
 
                 if (noteDate !== lastDate && noteDate !== '') {
                     lastDate = noteDate;
@@ -552,8 +575,6 @@
                     separator.textContent = noteDate;
                     container.appendChild(separator);
                 }
-
-                var isSaved = note.id && note.id !== '';
 
                 var dropdownHtml = '';
                 if(note.username === userName && !isSaved){
@@ -574,7 +595,7 @@
                         '<div class="bubble-content">' +
                             '<div class="bubble-header">' +
                                 '<span class="bubble-name">' + note.name + '</span>' +
-                                (isSaved ? '<span class="bubble-date">' + dateString + '</span>' : '') +
+                                (isSaved ? '<span class="bubble-date">' + dateStr + '</span>' : '') +
                                 (!isSaved ?
                                     '<svg class="icon-pending" title="Unsaved" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
                                         '<circle cx="12" cy="12" r="10"></circle>' +
@@ -683,7 +704,22 @@
             });
         }
 
+        function getDateLabel(dateStr) {
+            var d = new Date(dateStr);
+            if (isNaN(d.getTime())) return '';
 
+            var today = new Date().toDateString();
+            var yesterday = new Date(Date.now() - 86400000).toDateString();
+
+            var targetDateStr = d.toDateString();
+
+            if (targetDateStr === today) return 'Today';
+            if (targetDateStr === yesterday) return 'Yesterday';
+
+            return d.toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
+            });
+        }
 
         function isWithin30Minutes(date1, date2) {
             let diffInMs = Math.abs(date1 - date2);

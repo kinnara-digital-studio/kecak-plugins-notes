@@ -205,13 +205,10 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                                         cal.get(Calendar.DAY_OF_YEAR) == yesterday.get(Calendar.DAY_OF_YEAR)) {
                                     dateLabel = "Yesterday";
                                 }
-
                                 jsonObject.put("dateLabel", dateLabel);
-                                jsonObject.put("date", dateCreated.toInstant().toString());
                             } else {
                                 jsonObject.put("dateStr", "");
                                 jsonObject.put("dateLabel", "");
-                                jsonObject.put("date", "");
                             }
 
                             jsonObject.put("notes", note.getNote());
