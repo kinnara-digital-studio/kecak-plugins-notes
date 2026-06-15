@@ -244,6 +244,7 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
         dataModel.put("isReadOnlyLabel", isReadOnlyLabel);
         dataModel.put("isMultirow", isMultirow);
         dataModel.put("primaryKey", formData.getPrimaryKeyValue());
+        dataModel.put("alertMessage", getPropertyString("alertMessage"));
 
         String html = FormUtil.generateElementHtml(this, formData, template, dataModel);
         return html;

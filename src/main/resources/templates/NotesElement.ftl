@@ -505,6 +505,27 @@
                     quill.setContents([]);
                 });
             }
+
+            var alertMessage = '${(alertMessage!"")?js_string}';
+
+            if (alertMessage !== '') {
+                document.addEventListener('click', function(e) {
+                    var target = e.target;
+                    if (target &&
+                        (target.classList.contains('waves-button-input') ||
+                         (target.type === 'submit' && target.id === 'submit'))) {
+
+                        var text = quill.getText().trim();
+
+                        if (text !== "" && quill.getLength() > 1) {
+                            e.preventDefault();
+                            e.stopImmediatePropagation();
+                            alert(alertMessage);
+                            return false;
+                        }
+                    }
+                }, true);
+            }
         }
 
         renderNotes(jsonNotes);
