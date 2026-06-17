@@ -124,7 +124,10 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                                 noteType.isEmpty() ? NoteType.NOTE : NoteType.valueOf(noteType),
                                 0);
 
-                        formRowSet.add(binder.fromNote(note));
+                        FormRow noteRow = binder.fromNote(note);
+                        if(noteRow != null) {
+                            formRowSet.add(noteRow);
+                        }
                     }
                 } catch (Exception e) {
                     LogUtil.error(getClassName(), e, "Error parsing multirow: " + e.getMessage());
@@ -170,6 +173,7 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                     .stream()
                     .flatMap(Collection::stream)
                     .map(binder::toNote)
+                    .filter(Objects::nonNull)
                     .forEach(note -> {
                         try {
                             JSONObject jsonObject = new JSONObject();
