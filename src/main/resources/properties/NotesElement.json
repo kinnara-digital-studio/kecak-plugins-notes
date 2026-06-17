@@ -63,6 +63,31 @@
         "options_ajax": "[CONTEXT_PATH]/web/property/json/getElements?classname=%s",
         "url": "[CONTEXT_PATH]/web/property/json[APP_PATH]/getPropertyOptions",
         "value": "%s"
+      },
+      {
+        "label": "Control Field",
+        "type": "header"
+      },
+      {
+        "name": "controlField",
+        "label": "Control Field",
+        "type": "grid",
+        "columns": [
+            {
+              "key": "fieldId",
+              "label": "Field ID"
+            },
+            {
+              "key": "reverseValue",
+              "label": "Reverse Value",
+              "type": "truefalse",
+              "false_value": ""
+            },
+            {
+              "key": "fieldValue",
+              "label": "Field Value"
+            }
+        ]
       }
     ]
   }

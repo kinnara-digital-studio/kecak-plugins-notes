@@ -236,6 +236,21 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
 
         boolean isMultirow = this.getLoadBinder() != null;
 
+        Object controlField = getProperty("controlField");
+        if (controlField != null && controlField instanceof Object[]) {
+            try {
+                JSONArray jsonArray = new JSONArray();
+                for (Object o : (Object[]) controlField) {
+                    jsonArray.put(new JSONObject((Map) o));
+                }
+                dataModel.put("controlFieldJson", jsonArray.toString());
+            } catch (Exception e) {
+                dataModel.put("controlFieldJson", "[]");
+            }
+        } else {
+            dataModel.put("controlFieldJson", "[]");
+        }
+
         dataModel.put("value", (value == null || value.isEmpty()) ? "[]" : value);
         dataModel.put("className", getClassName());
         dataModel.put("userName", userName);
@@ -248,5 +263,82 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
 
         String html = FormUtil.generateElementHtml(this, formData, template, dataModel);
         return html;
+    }
+
+    @Override
+    public boolean continueValidation(FormData formData) {
+        if (!isControlFieldVisible(formData)) {
+            return false;
+        }
+        return super.continueValidation(formData);
+    }
+
+    private boolean isControlFieldVisible(FormData formData) {
+        Object controlFieldObj = getProperty("controlField");
+        if (controlFieldObj != null && controlFieldObj instanceof Object[]) {
+            Object[] controlFields = (Object[]) controlFieldObj;
+            if (controlFields.length == 0) {
+                return true;
+            }
+
+            boolean isVisible = true;
+            for (Object ruleObj : controlFields) {
+                if (ruleObj instanceof Map) {
+                    Map<String, Object> rule = (Map<String, Object>) ruleObj;
+                    String fieldId = (String) rule.get("fieldId");
+                    String ruleValue = (String) rule.get("fieldValue");
+                    if (ruleValue == null) ruleValue = "";
+
+                    String reverseValueStr = String.valueOf(rule.get("reverseValue"));
+                    boolean reverseValue = "true".equalsIgnoreCase(reverseValueStr);
+
+                    String[] targetValues = formData.getRequestParameterValues(fieldId);
+                    if (targetValues == null || targetValues.length == 0) {
+                        Form form = FormUtil.findRootForm(this);
+                        if (form != null) {
+                            Element targetElement = FormUtil.findElement(fieldId, form, formData);
+                            if (targetElement != null) {
+                                String val = FormUtil.getElementPropertyValue(targetElement, formData);
+                                if (val != null) {
+                                    targetValues = val.split(";");
+                                }
+                            }
+                        }
+                    }
+
+                    if (targetValues == null || targetValues.length == 0) {
+                        targetValues = new String[]{""};
+                    }
+
+                    boolean match = false;
+                    String[] ruleValues = ruleValue.split(";");
+
+                    for (String tVal : targetValues) {
+                        for (String rVal : ruleValues) {
+                            if (tVal.equals(rVal)) {
+                                match = true;
+                                break;
+                            }
+                        }
+                        if (match) break;
+                    }
+
+                    if ("".equals(ruleValue) && targetValues.length == 1 && "".equals(targetValues[0])) {
+                        match = true;
+                    }
+
+                    if (reverseValue) {
+                        match = !match;
+                    }
+
+                    if (!match) {
+                        isVisible = false;
+                        break;
+                    }
+                }
+            }
+            return isVisible;
+        }
+        return true;
     }
 }

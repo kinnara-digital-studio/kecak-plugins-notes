@@ -515,13 +515,19 @@
                         (target.classList.contains('waves-button-input') ||
                          (target.type === 'submit' && target.id === 'submit'))) {
 
-                        var text = quill.getText().trim();
+                        var myTarget = document.getElementById(paramName);
+                        var formCell = myTarget ? myTarget.closest('.form-cell, .subform-cell') : null;
+                        var isHidden = formCell ? (formCell.style.display === 'none' || formCell.classList.contains('section-visibility-hidden')) : false;
 
-                        if (text !== "" && quill.getLength() > 1) {
-                            e.preventDefault();
-                            e.stopImmediatePropagation();
-                            alert(alertMessage);
-                            return false;
+                        if (!isHidden) {
+                            var text = quill.getText().trim();
+
+                            if (text !== "" && quill.getLength() > 1) {
+                                e.preventDefault();
+                                e.stopImmediatePropagation();
+                                alert(alertMessage);
+                                return false;
+                            }
                         }
                     }
                 }, true);
@@ -754,6 +760,77 @@
             } else {
                 window.scrollTo(0, 0);
             }
+        }
+
+        // --- Control Field Visibility Logic ---
+        var controlFields = ${controlFieldJson!'[]'};
+        var $targetElement = $('[name="' + paramName + '"]').closest('.form-cell, .subform-cell');
+
+        var isFormBuilder = window.location.href.indexOf('/form/builder/') !== -1;
+
+        if (controlFields && controlFields.length > 0 && !isFormBuilder) {
+            var checkVisibility = function() {
+                var isVisible = true;
+                $.each(controlFields, function(index, rule) {
+                    var targetField = window.FormUtil ? FormUtil.getField(rule.fieldId) : $('[name=' + rule.fieldId + ']');
+                    if (targetField.length > 0) {
+                        var targetValue = "";
+                        if (targetField.is(":checkbox, :radio")) {
+                            var checkedVals = [];
+                            targetField.filter(":checked").each(function() {
+                                checkedVals.push($(this).val());
+                            });
+                            targetValue = checkedVals.join(";");
+                        } else {
+                            targetValue = targetField.val() || "";
+                        }
+
+                        var match = false;
+                        var ruleValue = rule.fieldValue || "";
+                        var ruleValues = ruleValue.split(';');
+
+                        var targetValues = targetValue.split(';');
+                        $.each(targetValues, function(i, tVal) {
+                            if ($.inArray(tVal, ruleValues) !== -1) {
+                                match = true;
+                                return false; // break loop
+                            }
+                        });
+
+                        if (ruleValue === "" && targetValue === "") {
+                            match = true;
+                        }
+
+                        if (rule.reverseValue === 'true' || rule.reverseValue === true) {
+                            match = !match;
+                        }
+
+                        if (!match) {
+                            isVisible = false;
+                            return false; // break loop, AND condition
+                        }
+                    }
+                });
+
+                if (isVisible) {
+                    $targetElement.show();
+                    $targetElement.removeClass('section-visibility-hidden');
+                    $targetElement.find("input, select, textarea, button, div[contenteditable]").prop("disabled", false);
+                } else {
+                    $targetElement.hide();
+                    $targetElement.addClass('section-visibility-hidden');
+                    $targetElement.find("input, select, textarea, button, div[contenteditable]").prop("disabled", true);
+                }
+            };
+
+            $.each(controlFields, function(index, rule) {
+                var targetField = window.FormUtil ? FormUtil.getField(rule.fieldId) : $('[name=' + rule.fieldId + ']');
+                if (targetField.length > 0) {
+                    targetField.on('change', checkVisibility);
+                }
+            });
+
+            checkVisibility();
         }
 
     })();
