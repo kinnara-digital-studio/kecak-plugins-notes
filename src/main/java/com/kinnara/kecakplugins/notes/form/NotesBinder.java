@@ -14,8 +14,8 @@ import org.joget.apps.form.service.FormService;
 import org.joget.commons.util.LogUtil;
 import org.joget.plugin.base.PluginManager;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class NotesBinder extends FormBinder implements NotesLoadBinder, NotesStoreBinder {
 
@@ -27,13 +27,21 @@ public class NotesBinder extends FormBinder implements NotesLoadBinder, NotesSto
     }
 
     @Override
-    public FormRowSet store(Element element, FormRowSet rowSet, FormData formData) {
+    public List<Notes> storeNotes(Element element, List<Notes> notes, FormData formData) {
         String notesFormDefId = getPropertyString("notesFormDefId");
         Form notesForm = generateForm(notesFormDefId);
 
         if (notesForm == null || notesFormDefId.isEmpty()){
-            return rowSet;
+            return Collections.emptyList();
         }
+
+        FormRowSet rowSet = Optional.ofNullable(notes)
+                .stream()
+                .flatMap(Collection::stream)
+                .map(this::fromNote)
+                .collect(Collectors.toCollection(FormRowSet::new));
+
+        rowSet.setMultiRow(true);
 
         FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
         try {
@@ -42,7 +50,11 @@ public class NotesBinder extends FormBinder implements NotesLoadBinder, NotesSto
             LogUtil.error(getClassName(), e, "save failed, error: " + e);
         }
 
-        return rowSet;
+        return Optional.of(rowSet)
+                .stream()
+                .flatMap(Collection::stream)
+                .map(this::toNote)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -103,25 +115,26 @@ public class NotesBinder extends FormBinder implements NotesLoadBinder, NotesSto
     }
 
     @Override
-    public FormRowSet load(Element element, String primaryKey, FormData formData) {
+    public List<Notes> loadNotes(Element element, String primaryKey, FormData formData) {
         String notesFormDefId = getPropertyString("notesFormDefId");
         Form notesForm = generateForm(notesFormDefId);
 
         if (notesForm == null || notesFormDefId.isEmpty()){
-            return new FormRowSet() {{
-                setMultiRow(true);
-            }};
+            return null;
         }
 
         String recordId = getFieldRecordId();
 
         FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
-        FormRowSet rowSet = formDataDao.find(notesForm, "WHERE c_" + recordId + " = ?", new Object[]{primaryKey}, "dateCreated", false, null, null);
-        return rowSet;
+        FormRowSet rowSet = formDataDao.find(notesForm, "WHERE e.customProperties" + recordId + " = ?", new Object[]{primaryKey}, "dateCreated", false, null, null);
+        return Optional.ofNullable(rowSet)
+                .stream()
+                .flatMap(FormRowSet::stream)
+                .map(this::toNote)
+                .collect(Collectors.toList());
     }
 
-    @Override
-    public Notes toNote(FormRow row) {
+    protected Notes toNote(FormRow row) {
         String recordId = getFieldRecordId();
         String notes = getFieldNotes();
         String type = getFieldType();
@@ -139,8 +152,7 @@ public class NotesBinder extends FormBinder implements NotesLoadBinder, NotesSto
         );
     }
 
-    @Override
-    public FormRow fromNote(Notes note) {
+    protected FormRow fromNote(Notes note) {
         return new FormRow() {{
             setId(note.getId());
             setProperty(getFieldRecordId(), note.getRecordId());

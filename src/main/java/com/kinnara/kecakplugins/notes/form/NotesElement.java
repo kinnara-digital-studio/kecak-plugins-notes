@@ -1,7 +1,6 @@
 package com.kinnara.kecakplugins.notes.form;
 
 import com.kinnara.kecakplugins.notes.model.NoteType;
-import com.kinnara.kecakplugins.notes.model.Notes;
 import com.kinnara.kecakplugins.notes.model.NotesLoadBinder;
 import com.kinnara.kecakplugins.notes.model.NotesStoreBinder;
 import org.joget.apps.app.service.AppUtil;
@@ -24,6 +23,13 @@ import java.util.*;
  * @author AKMAL
  */
 public class NotesElement extends Element implements FormBuilderPaletteElement {
+    public final static String FIELD_RECORD_ID = "record_id";
+    public final static String FIELD_NOTE = "note";
+    public final static String FIELD_USERNAME = "username";
+    public final static String FIELD_DISPLAY_NAME = "display_name";
+    public final static String FIELD_NOTE_TYPE = "note_type";
+    public final static String FIELD_ORDER = "order";
+
     @Override
     public String getName() {
         return getLabel();
@@ -112,22 +118,21 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonNote = jsonArray.getJSONObject(i);
 
-                        String noteType = jsonNote.optString("type", NoteType.NOTE.name()).toUpperCase(Locale.ROOT);
+                        String noteType = jsonNote.optString("type");
+                        NoteType type = noteType.isEmpty() ? NoteType.NOTE : NoteType.valueOf(noteType);
                         Date uniqueDate = new Date(baseTimestamp + i);
-                        Notes note = new Notes(
-                                UUID.randomUUID().toString(),
-                                primaryKey,
-                                username,
-                                fullName,
-                                jsonNote.optString("notes"),
-                                uniqueDate,
-                                noteType.isEmpty() ? NoteType.NOTE : NoteType.valueOf(noteType),
-                                0);
-
-                        FormRow noteRow = binder.fromNote(note);
-                        if(noteRow != null) {
-                            formRowSet.add(noteRow);
-                        }
+                        String order = String.valueOf(i);
+                        FormRow noteRow = new FormRow() {{
+                            setId(UUID.randomUUID().toString());
+                            setProperty(FIELD_RECORD_ID, primaryKey);
+                            setProperty(FIELD_USERNAME, username);
+                            setProperty(FIELD_DISPLAY_NAME, fullName);
+                            setProperty(FIELD_NOTE, jsonNote.optString("notes"));
+                            setDateCreated(uniqueDate);
+                            setProperty(FIELD_NOTE_TYPE, type.name());
+                            setProperty(FIELD_ORDER, order);
+                        }};
+                        formRowSet.add(noteRow);
                     }
                 } catch (Exception e) {
                     LogUtil.error(getClassName(), e, "Error parsing multirow: " + e.getMessage());
@@ -164,23 +169,18 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
 
         if (loadBinder instanceof NotesLoadBinder) {
             JSONArray jsonArray = new JSONArray();
-
-            NotesLoadBinder binder = (NotesLoadBinder) loadBinder;
-            FormRowSet noteList = formData.getLoadBinderData(this);
-//            binder.load(this, formData.getPrimaryKeyValue(), formData);
-
-            Optional.ofNullable(noteList)
+            FormRowSet notesRowSet = formData.getLoadBinderData(this);
+            Optional.ofNullable(notesRowSet)
                     .stream()
                     .flatMap(Collection::stream)
-                    .map(binder::toNote)
                     .filter(Objects::nonNull)
-                    .forEach(note -> {
+                    .forEach(row -> {
                         try {
                             JSONObject jsonObject = new JSONObject();
-                            jsonObject.put("id", note.getId());
-                            jsonObject.put("username", note.getUsername());
-                            jsonObject.put("name", note.getDisplayName());
-                            Date dateCreated = note.getDate();
+                            jsonObject.put("id", row.getId());
+                            jsonObject.put("username", row.getProperty(FIELD_USERNAME));
+                            jsonObject.put("name", row.getProperty(FIELD_DISPLAY_NAME));
+                            Date dateCreated = row.getDateCreated();
                             if (dateCreated != null) {
                                 if (user != null && user.getTimeZone() != null && !user.getTimeZone().trim().isEmpty()) {
                                     String pattern = "dd/MM/yyyy HH:mm:ss";
@@ -215,8 +215,8 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                                 jsonObject.put("dateLabel", "");
                             }
 
-                            jsonObject.put("notes", note.getNote());
-                            jsonObject.put("type", note.getType().name());
+                            jsonObject.put("notes", row.getProperty(FIELD_NOTE));
+                            jsonObject.put("type", row.getProperty(FIELD_NOTE_TYPE));
 
                             jsonArray.put(jsonObject);
 
