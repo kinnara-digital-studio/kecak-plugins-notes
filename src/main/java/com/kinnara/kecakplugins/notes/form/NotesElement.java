@@ -1,8 +1,6 @@
 package com.kinnara.kecakplugins.notes.form;
 
 import com.kinnara.kecakplugins.notes.model.NoteType;
-import com.kinnara.kecakplugins.notes.model.NotesLoadBinder;
-import com.kinnara.kecakplugins.notes.model.NotesStoreBinder;
 import org.joget.apps.app.service.AppUtil;
 import org.joget.apps.form.model.*;
 import org.joget.apps.form.service.FormUtil;
@@ -171,7 +169,7 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                 new String[]{formData.getPrimaryKeyValue()});
         FormLoadBinder loadBinder = this.getLoadBinder();
 
-        if (loadBinder instanceof NotesLoadBinder) {
+        if (loadBinder != null) {
             JSONArray jsonArray = new JSONArray();
             FormRowSet notesRowSet = formData.getLoadBinderData(this);
             Optional.ofNullable(notesRowSet)
