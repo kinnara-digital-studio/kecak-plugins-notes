@@ -1,0 +1,40 @@
+[
+  {
+    "title": "History Store Notes Binder",
+    "properties": [
+      {
+        "name": "notesFormDefId",
+        "label": "Notes Form ID",
+        "type" : "selectbox",
+        "required" : "true",
+        "options_ajax" : "[CONTEXT_PATH]/web/json/console/app[APP_PATH]/forms/options",
+        "description": "Form ID tabel notes terpisah (contoh: t_notes_table)"
+      },
+      {
+        "label": "Notes Form Field Id",
+        "type": "header"
+      },
+      {
+        "name": "fieldRecordId",
+        "label": "Field: Record ID",
+        "type": "textfield",
+        "value": "record_id",
+        "required" : "true"
+      },
+      {
+        "name": "fieldNotes",
+        "label": "Field: Notes Content",
+        "type": "textfield",
+        "value": "notes",
+        "required" : "true"
+      },
+      {
+        "name": "fieldType",
+        "label": "Field: Type",
+        "type": "textfield",
+        "value": "type",
+        "required" : "true"
+      }
+    ]
+  }
+]

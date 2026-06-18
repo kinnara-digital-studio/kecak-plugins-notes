@@ -23,8 +23,6 @@ import java.util.*;
 public class NotesElement extends Element implements FormBuilderPaletteElement {
     public final static String FIELD_RECORD_ID = "record_id";
     public final static String FIELD_NOTE = "note";
-    public final static String FIELD_USERNAME = "username";
-    public final static String FIELD_DISPLAY_NAME = "display_name";
     public final static String FIELD_NOTE_TYPE = "note_type";
     public final static String FIELD_ORDER = "order";
 
@@ -119,8 +117,8 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                         FormRow noteRow = new FormRow() {{
                             setId(UUID.randomUUID().toString());
                             setProperty(FIELD_RECORD_ID, primaryKey);
-                            setProperty(FIELD_USERNAME, username);
-                            setProperty(FIELD_DISPLAY_NAME, fullName);
+                            setCreatedBy(username);
+                            setCreatedByName(fullName);
                             setProperty(FIELD_NOTE, jsonNote.optString("notes"));
                             setDateCreated(uniqueDate);
 
@@ -180,8 +178,8 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                         try {
                             JSONObject jsonObject = new JSONObject();
                             jsonObject.put("id", row.getId());
-                            jsonObject.put("username", row.getProperty(FIELD_USERNAME));
-                            jsonObject.put("name", row.getProperty(FIELD_DISPLAY_NAME));
+                            jsonObject.put("username", row.getCreatedBy());
+                            jsonObject.put("name", row.getCreatedByName());
                             Date dateCreated = row.getDateCreated();
                             if (dateCreated != null) {
                                 if (user != null && user.getTimeZone() != null && !user.getTimeZone().trim().isEmpty()) {

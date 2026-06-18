@@ -3,6 +3,7 @@ package com.kinnara.kecakplugins.notes;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.kinnara.kecakplugins.notes.form.HistoryStoreNotesBinder;
 import com.kinnara.kecakplugins.notes.form.NotesElement;
 import com.kinnara.kecakplugins.notes.form.NotesBinder;
 import org.osgi.framework.BundleActivator;
@@ -20,6 +21,7 @@ public class Activator implements BundleActivator {
         //registrationList.add(context.registerService(MyPlugin.class.getName(), new MyPlugin(), null));
         registrationList.add(context.registerService(NotesElement.class.getName(), new NotesElement(), null));
         registrationList.add(context.registerService(NotesBinder.class.getName(), new NotesBinder(), null));
+        registrationList.add(context.registerService(HistoryStoreNotesBinder.class.getName(), new HistoryStoreNotesBinder(), null));
     }
 
     public void stop(BundleContext context) {

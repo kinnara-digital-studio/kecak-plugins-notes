@@ -20,8 +20,8 @@ public interface NotesLoadBinder extends FormLoadBinder, FormLoadMultiRowElement
                     setDateCreated(n.getDate());
                     setProperty(NotesElement.FIELD_RECORD_ID, n.getRecordId());
                     setProperty(NotesElement.FIELD_NOTE, n.getNote());
-                    setProperty(NotesElement.FIELD_USERNAME, n.getUsername());
-                    setProperty(NotesElement.FIELD_DISPLAY_NAME, n.getDisplayName());
+                    setCreatedBy(n.getUsername());
+                    setCreatedByName(n.getDisplayName());
                     setProperty(NotesElement.FIELD_NOTE_TYPE, n.getType().name());
                 }}).collect(Collectors.toCollection(FormRowSet::new));
 

@@ -49,12 +49,7 @@ public class NotesBinder extends FormBinder implements NotesLoadBinder, NotesSto
         } catch (Exception e) {
             LogUtil.error(getClassName(), e, "save failed, error: " + e);
         }
-
-        return Optional.of(rowSet)
-                .stream()
-                .flatMap(Collection::stream)
-                .map(this::toNote)
-                .collect(Collectors.toList());
+        return notes;
     }
 
     @Override

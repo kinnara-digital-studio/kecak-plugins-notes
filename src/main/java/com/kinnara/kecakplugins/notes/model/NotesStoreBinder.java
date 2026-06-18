@@ -17,8 +17,8 @@ public interface NotesStoreBinder extends FormStoreBinder, FormStoreMultiRowElem
                 .map(r -> new Notes(
                         r.getId(),
                         r.getProperty(NotesElement.FIELD_RECORD_ID),
-                        r.getProperty(NotesElement.FIELD_USERNAME),
-                        r.getProperty(NotesElement.FIELD_DISPLAY_NAME),
+                        r.getCreatedBy(),
+                        r.getCreatedByName(),
                         r.getProperty(NotesElement.FIELD_NOTE),
                         r.getDateCreated(),
                         NoteType.valueOf(r.getProperty(NotesElement.FIELD_NOTE_TYPE)),
@@ -34,8 +34,8 @@ public interface NotesStoreBinder extends FormStoreBinder, FormStoreMultiRowElem
                     setDateCreated(n.getDate());
                     setProperty(NotesElement.FIELD_RECORD_ID, n.getRecordId());
                     setProperty(NotesElement.FIELD_NOTE, n.getNote());
-                    setProperty(NotesElement.FIELD_USERNAME, n.getUsername());
-                    setProperty(NotesElement.FIELD_DISPLAY_NAME, n.getDisplayName());
+                    setCreatedBy(n.getUsername());
+                    setCreatedByName(n.getDisplayName());
                     setProperty(NotesElement.FIELD_NOTE_TYPE, n.getType().name());
                 }})
                 .collect(Collectors.toCollection(FormRowSet::new));
