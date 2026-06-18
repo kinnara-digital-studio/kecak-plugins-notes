@@ -1,5 +1,7 @@
-<div class="form-cell" ${elementMetaData!}>
-    <label class="label">${element.properties.label!} <span class="form-cell-validator">${decoration}</span></label>
+<div class="form-cell<#if !(element.properties.label!"")?has_content> notes-no-label</#if>" ${elementMetaData!}>
+    <#if (element.properties.label!"")?has_content>
+        <label class="label">${element.properties.label!} <span class="form-cell-validator">${decoration}</span></label>
+    </#if>
 
     <#if error??>
         <span class="form-error-message">${error}</span>
@@ -70,6 +72,15 @@
     <style>
         .form-cell:has(.notes-element-wrapper) {
             overflow: visible !important;
+        }
+        .form-cell.notes-no-label {
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .form-cell.notes-no-label > .form-cell-value {
+            width: 100% !important;
+            max-width: 100% !important;
         }
         .editor-row-container {
             display: flex;
