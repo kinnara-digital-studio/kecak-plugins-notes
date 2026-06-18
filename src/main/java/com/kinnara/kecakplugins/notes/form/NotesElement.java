@@ -101,16 +101,11 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
         String username = user.getUsername();
         String fullName = user.getFirstName() + " " + user.getLastName();
 
-        LogUtil.info(getClassName(), "value" +
-                " di format data: " + value);
-
         FormStoreBinder storeBinder = this.getStoreBinder();
         FormRowSet formRowSet = new FormRowSet();
         formRowSet.setMultiRow(true);
 
-        if (storeBinder instanceof NotesStoreBinder) {
-            NotesStoreBinder binder = (NotesStoreBinder) storeBinder;
-
+        if (storeBinder != null) {
             if (value != null && !value.isEmpty()) {
                 try {
                     JSONArray jsonArray = new JSONArray(value);
@@ -119,7 +114,8 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                         JSONObject jsonNote = jsonArray.getJSONObject(i);
 
                         String noteType = jsonNote.optString("type");
-                        NoteType type = noteType.isEmpty() ? NoteType.NOTE : NoteType.valueOf(noteType);
+
+
                         Date uniqueDate = new Date(baseTimestamp + i);
                         String order = String.valueOf(i);
                         FormRow noteRow = new FormRow() {{
@@ -129,6 +125,14 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                             setProperty(FIELD_DISPLAY_NAME, fullName);
                             setProperty(FIELD_NOTE, jsonNote.optString("notes"));
                             setDateCreated(uniqueDate);
+
+                            NoteType type;
+                            try {
+                                type = NoteType.valueOf(noteType);
+                            } catch (Exception e) {
+                                type = NoteType.NOTE;
+                            }
+
                             setProperty(FIELD_NOTE_TYPE, type.name());
                             setProperty(FIELD_ORDER, order);
                         }};

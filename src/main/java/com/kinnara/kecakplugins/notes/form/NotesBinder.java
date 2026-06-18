@@ -119,14 +119,14 @@ public class NotesBinder extends FormBinder implements NotesLoadBinder, NotesSto
         String notesFormDefId = getPropertyString("notesFormDefId");
         Form notesForm = generateForm(notesFormDefId);
 
-        if (notesForm == null || notesFormDefId.isEmpty()){
+        if (primaryKey == null|| notesForm == null || notesFormDefId.isEmpty()){
             return null;
         }
 
         String recordId = getFieldRecordId();
 
         FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
-        FormRowSet rowSet = formDataDao.find(notesForm, "WHERE e.customProperties" + recordId + " = ?", new Object[]{primaryKey}, "dateCreated", false, null, null);
+        FormRowSet rowSet = formDataDao.find(notesForm, "WHERE e.customProperties." + recordId + " = ?", new Object[]{primaryKey}, "dateCreated", false, null, null);
         return Optional.ofNullable(rowSet)
                 .stream()
                 .flatMap(FormRowSet::stream)
