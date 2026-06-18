@@ -24,7 +24,6 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
     public final static String FIELD_RECORD_ID = "record_id";
     public final static String FIELD_NOTE = "note";
     public final static String FIELD_NOTE_TYPE = "note_type";
-    public final static String FIELD_ORDER = "order";
 
     @Override
     public String getName() {
@@ -111,9 +110,7 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
 
                         String noteType = jsonNote.optString("type");
 
-
                         Date uniqueDate = new Date(baseTimestamp + i);
-                        String order = String.valueOf(i);
                         FormRow noteRow = new FormRow() {{
                             setId(UUID.randomUUID().toString());
                             setProperty(FIELD_RECORD_ID, primaryKey);
@@ -130,7 +127,6 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                             }
 
                             setProperty(FIELD_NOTE_TYPE, type.name());
-                            setProperty(FIELD_ORDER, order);
                         }};
                         formRowSet.add(noteRow);
                     }

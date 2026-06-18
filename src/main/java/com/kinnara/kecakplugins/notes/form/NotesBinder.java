@@ -142,8 +142,7 @@ public class NotesBinder extends FormBinder implements NotesLoadBinder, NotesSto
                 row.getCreatedByName(),
                 row.getProperty(notes),
                 row.getDateCreated(),
-                noteType.isEmpty() ? NoteType.NOTE : NoteType.valueOf(noteType.toUpperCase(Locale.ROOT)),
-                0
+                noteType.isEmpty() ? NoteType.NOTE : NoteType.valueOf(noteType.toUpperCase(Locale.ROOT))
         );
     }
 

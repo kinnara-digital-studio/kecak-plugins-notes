@@ -93,8 +93,8 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
                     messageBuilder
                         .append("<p>Changed <b><i>").append(fieldLabel.isEmpty() ? fieldId : fieldLabel)
                         .append("</i></b> from <b><s>").append(oldValue)
-                        .append("</s></b> to <b><i>").append(newValue)
-                        .append("</i></b></p>");
+                        .append("</s></b> to <b>").append(newValue)
+                        .append("</b></p>");
                 }
             }
         }
@@ -107,8 +107,7 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
                     fullName,
                     messageBuilder.toString(),
                     new Date(),
-                    NoteType.LOG,
-                    0);
+                    NoteType.LOG);
 
             notes.add(note);
 

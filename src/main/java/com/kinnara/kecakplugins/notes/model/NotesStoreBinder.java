@@ -21,8 +21,7 @@ public interface NotesStoreBinder extends FormStoreBinder, FormStoreMultiRowElem
                         r.getCreatedByName(),
                         r.getProperty(NotesElement.FIELD_NOTE),
                         r.getDateCreated(),
-                        NoteType.valueOf(r.getProperty(NotesElement.FIELD_NOTE_TYPE)),
-                        Integer.parseInt(r.getProperty(NotesElement.FIELD_ORDER))
+                        NoteType.valueOf(r.getProperty(NotesElement.FIELD_NOTE_TYPE))
                 ))
                 .collect(Collectors.toList());
 

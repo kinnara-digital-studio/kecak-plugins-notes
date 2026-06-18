@@ -17,9 +17,8 @@ public class Notes {
     private final String note;
     private final Date date;
     private final NoteType type;
-    private final int order;
 
-    public Notes(String id, String recordId, String username, String displayName, String note, Date date, NoteType type, int order) {
+    public Notes(String id, String recordId, String username, String displayName, String note, Date date, NoteType type) {
         assert id != null;
         assert recordId != null;
         assert username != null;
@@ -35,7 +34,6 @@ public class Notes {
         this.note = note;
         this.date = date;
         this.type = type;
-        this.order = order;
     }
 
     public String getId() {
