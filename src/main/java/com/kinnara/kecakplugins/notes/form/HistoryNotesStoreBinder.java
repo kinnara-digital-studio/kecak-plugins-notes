@@ -20,9 +20,10 @@ import org.springframework.context.ApplicationContext;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class HistoryStoreNotesBinder extends FormBinder implements NotesStoreBinder {
+public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBinder {
 
     private final static String LABEL = "History Store Notes Binder";
+
     private static final Set<String> SYSTEM_FIELDS = new HashSet<>(Arrays.asList(
             "id", "dateCreated", "dateModified", "createdBy", "createdByName",
             "modifiedBy", "modifiedByName", "deleted", "orgId"
@@ -106,7 +107,7 @@ public class HistoryStoreNotesBinder extends FormBinder implements NotesStoreBin
 
             notes.add(note);
 
-            FormRowSet rowSet = Optional.of(notes)
+            FormRowSet storeRowSet = Optional.of(notes)
                     .stream()
                     .flatMap(Collection::stream)
                     .map(this::fromNote)
@@ -114,7 +115,7 @@ public class HistoryStoreNotesBinder extends FormBinder implements NotesStoreBin
 
             FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
             try {
-                formDataDao.saveOrUpdate(notesForm, rowSet);
+                formDataDao.saveOrUpdate(notesForm, storeRowSet);
             } catch (Exception e) {
                 LogUtil.error(getClassName(), e, "save failed, error: " + e);
             }
