@@ -22,12 +22,19 @@ import java.util.stream.Collectors;
 
 public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBinder {
 
-    private final static String LABEL = "History Store Notes Binder";
+    private final static String LABEL = "History Notes Store Binder";
 
-    private static final Set<String> SYSTEM_FIELDS = new HashSet<>(Arrays.asList(
-            "id", "dateCreated", "dateModified", "createdBy", "createdByName",
-            "modifiedBy", "modifiedByName", "deleted", "orgId"
-    ));
+    private static final Set<String> SYSTEM_FIELDS = Set.of(
+            FormUtil.PROPERTY_ID,
+            FormUtil.PROPERTY_DATE_CREATED,
+            FormUtil.PROPERTY_CREATED_BY,
+            FormUtil.PROPERTY_CREATED_BY_NAME,
+            FormUtil.PROPERTY_DATE_MODIFIED,
+            FormUtil.PROPERTY_MODIFIED_BY,
+            FormUtil.PROPERTY_MODIFIED_BY_NAME,
+            FormUtil.PROPERTY_DELETED,
+            FormUtil.PROPERTY_ORG_ID
+    );
 
     protected FormRow fromNote(Notes note) {
         return new FormRow() {{
@@ -66,8 +73,7 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
 
         if (isNewRecord) {
             String formName = f.getPropertyString("name");
-            messageBuilder.append("<p><b>").append(fullName)
-                    .append("</b> has created new <b>")
+            messageBuilder.append("<p>Created new <b>")
                     .append(formName.isEmpty() ? "Record" : formName)
                     .append("</b></p>");
         } else {
@@ -85,10 +91,9 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
 
                 if (newValue != null && !Objects.equals(oldValue, newValue)) {
                     messageBuilder
-                        .append("<p>").append(fullName)
-                        .append(" changed <b>").append(fieldLabel.isEmpty() ? fieldId : fieldLabel)
-                        .append("</b> from <b><i>").append(oldValue)
-                        .append("</i></b> to <b><i>").append(newValue)
+                        .append("<p>Changed <b><i>").append(fieldLabel.isEmpty() ? fieldId : fieldLabel)
+                        .append("</i></b> from <b><s>").append(oldValue)
+                        .append("</s></b> to <b><i>").append(newValue)
                         .append("</i></b></p>");
                 }
             }
@@ -112,6 +117,8 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
                     .flatMap(Collection::stream)
                     .map(this::fromNote)
                     .collect(Collectors.toCollection(FormRowSet::new));
+
+            storeRowSet.setMultiRow(true);
 
             FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
             try {
