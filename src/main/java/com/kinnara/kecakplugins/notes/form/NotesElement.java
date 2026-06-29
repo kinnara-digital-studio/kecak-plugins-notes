@@ -90,6 +90,7 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
         String value = formData.getRequestParameter(id);
         String primaryKey = formData.getPrimaryKeyValue();
 
+        LogUtil.info(getClassName(), "value di format data: "+ value);
         ApplicationContext appContext = AppUtil.getApplicationContext();
         WorkflowUserManager workflowUserManager = (WorkflowUserManager) appContext.getBean("workflowUserManager");
         User user = workflowUserManager.getCurrentUser();
@@ -125,7 +126,6 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                             } catch (Exception e) {
                                 type = NoteType.NOTE;
                             }
-
                             setProperty(FIELD_NOTE_TYPE, type.name());
                         }};
                         formRowSet.add(noteRow);

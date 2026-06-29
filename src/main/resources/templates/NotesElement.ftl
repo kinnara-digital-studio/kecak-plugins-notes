@@ -478,7 +478,7 @@
         //console.log('[Notes DEBUG] Total hidden inputs with same name:', allHiddenInputs.length);
 
         if (editor) {
-            const quill = new Quill('#notes-editor-' + paramName, {
+            var quill = new Quill('#notes-editor-' + paramName, {
                 readOnly: ${(isReadOnly!false)?c},
                 modules: {
                     toolbar: '#toolbar-container-' + paramName
@@ -517,32 +517,9 @@
                 });
             }
 
-            var alertMessage = '${(alertMessage!"")?js_string}';
-
-            if (alertMessage !== '') {
-                document.addEventListener('click', function(e) {
-                    var target = e.target;
-                    if (target &&
-                        (target.classList.contains('waves-button-input') ||
-                         (target.type === 'submit' && target.id === 'submit'))) {
-
-                        var myTarget = document.getElementById(paramName);
-                        var formCell = myTarget ? myTarget.closest('.form-cell, .subform-cell') : null;
-                        var isHidden = formCell ? (formCell.style.display === 'none' || formCell.classList.contains('section-visibility-hidden')) : false;
-
-                        if (!isHidden) {
-                            var text = quill.getText().trim();
-
-                            if (text !== "" && quill.getLength() > 1) {
-                                e.preventDefault();
-                                e.stopImmediatePropagation();
-                                alert(alertMessage);
-                                return false;
-                            }
-                        }
-                    }
-                }, true);
-            }
+            quill.on('text-change', function() {
+                updatePayload();
+            });
         }
 
         renderNotes(jsonNotes);
@@ -550,8 +527,21 @@
 
         function updatePayload() {
             var payloadValue = "";
+            var text = (typeof quill !== 'undefined' && quill) ? quill.getText().trim() : "";
+            var html = (typeof quill !== 'undefined' && quill) ? quill.root.innerHTML : "";
+            var currentNote = null;
+            var text = quill.getText().trim();
+            var hasImage = quill.root.querySelector('img') !== null;
+            var hasContent = (text !== "" || hasImage) && quill.getLength() > 1;
+
+            if (hasContent) {
+                currentNote = {
+                    notes: html,
+                    type: 'note'
+                };
+            }
+
             if (!isMultirow) {
-                payloadValue = JSON.stringify(jsonNotes);
                 var cleaned = jsonNotes.map(function(n) {
                     var copy = Object.assign({}, n);
                     if (copy.tempId && (!copy.id || copy.id === '')) {
@@ -560,6 +550,16 @@
                     delete copy.tempId;
                     return copy;
                 });
+
+                if (currentNote) {
+                    var singleCopy = Object.assign({}, currentNote);
+                    singleCopy.name = displayName;
+                    singleCopy.username = userName;
+                    singleCopy.dateLabel = 'Today';
+                    singleCopy.dateStr = new Date().toLocaleString();
+                    cleaned.push(singleCopy);
+                }
+
                 payloadValue = JSON.stringify(cleaned);
             } else {
                 var pending = jsonNotes.filter(function(n) {
@@ -570,6 +570,9 @@
                         type: n.type || 'note'
                     };
                 });
+                if (currentNote) {
+                    pending.push(currentNote);
+                }
                 payloadValue = JSON.stringify(pending);
             }
 
@@ -577,7 +580,7 @@
             allInputs.forEach(function(inp) {
                 inp.value = payloadValue;
             });
-            console.log('[Notes DEBUG] Payload Updated:', payloadValue);
+            //console.log('[Notes DEBUG] Payload Updated:', payloadValue);
         }
 
         function renderNotes(notes) {

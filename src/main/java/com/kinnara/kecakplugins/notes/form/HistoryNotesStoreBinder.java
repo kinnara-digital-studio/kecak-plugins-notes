@@ -108,27 +108,24 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
                     messageBuilder.toString(),
                     new Date(),
                     NoteType.LOG);
-
             notes.add(note);
-
-            FormRowSet storeRowSet = Optional.of(notes)
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .map(this::fromNote)
-                    .collect(Collectors.toCollection(FormRowSet::new));
-
-            storeRowSet.setMultiRow(true);
-
-            FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
-            try {
-                formDataDao.saveOrUpdate(notesForm, storeRowSet);
-            } catch (Exception e) {
-                LogUtil.error(getClassName(), e, "save failed, error: " + e);
-            }
-            return notes;
-        } else {
-            return Collections.emptyList();
         }
+
+        FormRowSet storeRowSet = Optional.of(notes)
+                .stream()
+                .flatMap(Collection::stream)
+                .map(this::fromNote)
+                .collect(Collectors.toCollection(FormRowSet::new));
+
+        storeRowSet.setMultiRow(true);
+
+        FormDataDao formDataDao = (FormDataDao) AppUtil.getApplicationContext().getBean("formDataDao");
+        try {
+            formDataDao.saveOrUpdate(notesForm, storeRowSet);
+        } catch (Exception e) {
+            LogUtil.error(getClassName(), e, "save failed, error: " + e);
+        }
+        return notes;
     }
 
     @Override
