@@ -90,6 +90,7 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
         String value = formData.getRequestParameter(id);
         String primaryKey = formData.getPrimaryKeyValue();
 
+        LogUtil.info(getClassName(), "value di format data: "+ value);
         ApplicationContext appContext = AppUtil.getApplicationContext();
         WorkflowUserManager workflowUserManager = (WorkflowUserManager) appContext.getBean("workflowUserManager");
         User user = workflowUserManager.getCurrentUser();
@@ -125,7 +126,6 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                             } catch (Exception e) {
                                 type = NoteType.NOTE;
                             }
-
                             setProperty(FIELD_NOTE_TYPE, type.name());
                         }};
                         formRowSet.add(noteRow);
@@ -178,16 +178,17 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                             jsonObject.put("name", row.getCreatedByName());
                             Date dateCreated = row.getDateCreated();
                             if (dateCreated != null) {
-                                if (user != null && user.getTimeZone() != null && !user.getTimeZone().trim().isEmpty()) {
-                                    String pattern = "dd/MM/yyyy HH:mm:ss";
+                                String timeZone = (user != null && user.getTimeZone() != null && !user.getTimeZone().trim().isEmpty())
+                                        ? user.getTimeZone()
+                                        : TimeZone.getDefault().getID();
 
-                                    String date = TimeZoneUtil.convertToTimeZone(
-                                            dateCreated,
-                                            user.getTimeZone(),
-                                            pattern
-                                    );
-                                    jsonObject.put("dateStr", date);
-                                }
+                                String pattern = "dd/MM/yyyy HH:mm:ss";
+                                String date = TimeZoneUtil.convertToTimeZone(
+                                        dateCreated,
+                                        timeZone,
+                                        pattern
+                                );
+                                jsonObject.put("dateStr", date);
 
                                 SimpleDateFormat labelFormat = new SimpleDateFormat("dd MMMM yyyy");
                                 String dateLabel = labelFormat.format(dateCreated);
