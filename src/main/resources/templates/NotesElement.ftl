@@ -3,19 +3,21 @@
         <label class="label">${element.properties.label!} <span class="form-cell-validator">${decoration}</span></label>
     </#if>
 
+    <#assign elementId = elementParamName! + "_" + element.properties.elementUniqueKey >
+
     <#if error??>
         <span class="form-error-message">${error}</span>
     </#if>
 
     <div class="form-cell-value notes-element-wrapper">
-        <input type='hidden' name='${elementParamName!}' id='${elementParamName!}' value="">
+        <input type='hidden' name='${elementParamName!}' id='${elementId!}' value="">
 
         <#if isReadOnlyLabel!false>
-            <div id="note-list-${elementParamName!}" class="note-list-container"></div>
+            <div id="note-list-${elementId!}" class="note-list-container"></div>
         <#else>
             <div class="editor-row-container">
                 <div class="notes-editor-wrapper">
-                    <div id="toolbar-container-${elementParamName!}" class="notes-toolbar">
+                    <div id="toolbar-container-${elementId!}" class="notes-toolbar">
                         <span class="ql-formats">
                             <select class="ql-font"></select>
                             <select class="ql-header">
@@ -52,10 +54,10 @@
                             <button class="ql-clean"></button>
                         </span>
                     </div>
-                    <div id="notes-editor-${elementParamName!}" class="notes-editor-area"></div>
+                    <div id="notes-editor-${elementId!}" class="notes-editor-area"></div>
                 </div>
                 <#if !(isReadOnly!false)>
-                    <button type="button" id="btn-add-${elementParamName!}" class="save-note-btn" title="Save Note">
+                    <button type="button" id="btn-add-${elementId!}" class="save-note-btn" title="Save Note">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
@@ -65,7 +67,7 @@
                     </button>
                 </#if>
             </div>
-            <div id="note-list-${elementParamName!}" class="note-list-container"></div>
+            <div id="note-list-${elementId!}" class="note-list-container"></div>
         </#if>
     </div>
 
@@ -456,7 +458,7 @@
         setTimeout(applyPrimaryColor, 500);
         // === End primary color detection ===
 
-        var paramName = '${elementParamName!}'
+        var paramName = '${elementParamName!}';
 
         var userName = '${userName}';
         var displayName = '${name}';
@@ -468,9 +470,9 @@
         if (!Array.isArray(jsonNotes)) jsonNotes = [];
 
         var newNotes = [];
-        var editor = document.getElementById('notes-editor-' + paramName);
+        var editor = document.getElementById('notes-editor-${elementId!}');
 
-        var hiddenInput = document.getElementById(paramName);
+        var hiddenInput = document.getElementById(${elementId!});
         var allHiddenInputs = document.querySelectorAll('input[type="hidden"][name="' + paramName + '"]');
 
         //console.log('[Notes DEBUG] jsonNotes.length:', jsonNotes.length);
@@ -478,16 +480,16 @@
         //console.log('[Notes DEBUG] Total hidden inputs with same name:', allHiddenInputs.length);
 
         if (editor) {
-            var quill = new Quill('#notes-editor-' + paramName, {
+            var quill = new Quill('#notes-editor-${elementId}', {
                 readOnly: ${(isReadOnly!false)?c},
                 modules: {
-                    toolbar: '#toolbar-container-' + paramName
+                    toolbar: '#toolbar-container-${elementId!}'
                 },
                 placeholder: 'Write a note...',
                 theme: 'snow'
             });
 
-            var buttonAdd = document.getElementById('btn-add-' + paramName);
+            var buttonAdd = document.getElementById('btn-add-${elementId!}');
 
             if(buttonAdd) {
                 buttonAdd.addEventListener('click', function() {
@@ -584,7 +586,7 @@
         }
 
         function renderNotes(notes) {
-            var container = document.getElementById('note-list-' + paramName);
+            var container = document.getElementById('note-list-${elementId!}');
             container.innerHTML = '';
 
             var lastDate = null;
@@ -768,7 +770,7 @@
         }
 
         function scrollFormToTop() {
-            var formCell = document.getElementById('note-list-' + paramName);
+            var formCell = document.getElementById('note-list-${elementId!}');
             if (formCell) {
                 formCell.closest('.form-cell').scrollIntoView({ block: 'start', behavior: 'instant' });
             } else {
