@@ -92,7 +92,7 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
                 if (newValue != null && !Objects.equals(oldValue, newValue)) {
                     messageBuilder
                         .append("<p>Changed <b><i>").append(fieldLabel.isEmpty() ? fieldId : fieldLabel)
-                        .append("</i></b> from <b><s>").append(oldValue)
+                        .append("</i></b> from <b><s>").append(oldValue.isEmpty() ? "Empty" : oldValue)
                         .append("</s></b> to <b>").append(newValue)
                         .append("</b></p>");
                 }
