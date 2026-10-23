@@ -17,8 +17,9 @@ public class Notes {
     private final String note;
     private final Date date;
     private final NoteType type;
+    private final String orgId;
 
-    public Notes(String id, String recordId, String username, String displayName, String note, Date date, NoteType type) {
+    public Notes(String id, String recordId, String username, String displayName, String note, Date date, NoteType type, String orgId) {
         assert id != null;
         assert recordId != null;
         assert username != null;
@@ -26,6 +27,7 @@ public class Notes {
         assert note != null;
         assert date != null;
         assert type != null;
+        assert orgId != null;
 
         this.id = id;
         this.recordId = recordId;
@@ -34,6 +36,7 @@ public class Notes {
         this.note = note;
         this.date = date;
         this.type = type;
+        this.orgId = orgId;
     }
 
     public String getId() {
@@ -63,4 +66,9 @@ public class Notes {
     public NoteType getType() {
         return type;
     }
+
+    public String getOrgId() {
+        return orgId;
+    }
+
 }

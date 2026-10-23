@@ -45,6 +45,7 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
             setCreatedBy(note.getUsername());
             setCreatedByName(note.getDisplayName());
             setDateCreated(note.getDate());
+            setOrgId(note.getOrgId());
         }};
     }
 
@@ -107,7 +108,8 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
                     fullName,
                     messageBuilder.toString(),
                     new Date(),
-                    NoteType.LOG);
+                    NoteType.LOG,
+                    "*");
             notes.add(note);
         }
 

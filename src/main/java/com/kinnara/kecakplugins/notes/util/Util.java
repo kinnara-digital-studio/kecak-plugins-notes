@@ -14,6 +14,7 @@ public final class Util {
         jsonObject.put("date", note.getDate());
         jsonObject.put("notes", note.getNote());
         jsonObject.put("type", note.getType());
+        jsonObject.put("orgId", note.getOrgId());
         return jsonObject;
     }
 }

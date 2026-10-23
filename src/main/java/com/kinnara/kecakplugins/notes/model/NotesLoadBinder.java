@@ -23,6 +23,7 @@ public interface NotesLoadBinder extends FormLoadBinder, FormLoadMultiRowElement
                     setCreatedBy(n.getUsername());
                     setCreatedByName(n.getDisplayName());
                     setProperty(NotesElement.FIELD_NOTE_TYPE, n.getType().name());
+                    setOrgId(n.getOrgId());
                 }}).collect(Collectors.toCollection(FormRowSet::new));
 
         result.setMultiRow(true);
