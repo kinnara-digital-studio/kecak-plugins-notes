@@ -5,6 +5,7 @@ import org.joget.apps.app.service.AppUtil;
 import org.joget.apps.form.model.*;
 import org.joget.apps.form.service.FormUtil;
 import org.joget.commons.util.LogUtil;
+import org.joget.commons.util.SetupManager;
 import org.joget.commons.util.TimeZoneUtil;
 import org.joget.directory.model.User;
 import org.joget.plugin.base.PluginManager;
@@ -180,7 +181,7 @@ public class NotesElement extends Element implements FormBuilderPaletteElement {
                             if (dateCreated != null) {
                                 String timeZone = (user != null && user.getTimeZone() != null && !user.getTimeZone().trim().isEmpty())
                                         ? user.getTimeZone()
-                                        : TimeZone.getDefault().getID();
+                                        : null;
 
                                 String pattern = "dd/MM/yyyy HH:mm:ss";
                                 String date = TimeZoneUtil.convertToTimeZone(

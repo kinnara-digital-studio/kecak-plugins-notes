@@ -5,3 +5,4 @@ package-lock.json
 .settings/
 jdbc_binder_queries.sql
 notesFix.ftl
+GEMINI.md
