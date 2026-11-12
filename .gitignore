@@ -6,3 +6,4 @@ package-lock.json
 jdbc_binder_queries.sql
 notesFix.ftl
 GEMINI.md
+.vscode/
