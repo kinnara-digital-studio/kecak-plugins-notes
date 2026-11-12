@@ -8,6 +8,8 @@ import org.joget.apps.app.model.AppDefinition;
 import org.joget.apps.app.model.FormDefinition;
 import org.joget.apps.app.service.AppUtil;
 import org.joget.apps.form.dao.FormDataDao;
+import org.joget.apps.form.lib.HiddenField;
+import org.joget.apps.form.lib.SelectBox;
 import org.joget.apps.form.model.*;
 import org.joget.apps.form.service.FormService;
 import org.joget.apps.form.service.FormUtil;
@@ -82,19 +84,31 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
             for (String fieldId : fieldIds) {
                 if (SYSTEM_FIELDS.contains(fieldId)) continue;
 
-                String oldValue = rowBefore.getProperty(fieldId);
-                String newValue = formData.getRequestParameter(fieldId);
-
-                Element targetElement = FormUtil.findElement(fieldId, f, formData);
+                Element targetElement = FormUtil.findElement(fieldId, f, formData, true);
                 if (targetElement == null) continue;
+                if (targetElement instanceof HiddenField) continue;
+
+                String oldValue = Optional.ofNullable(rowBefore.getProperty(fieldId)).orElse("").trim();
+                String newValue = Optional.ofNullable(FormUtil.getRequestParameter(targetElement, formData)).orElse("").trim();
 
                 String fieldLabel = targetElement.getPropertyString(FormUtil.PROPERTY_LABEL);
+                if (fieldLabel == null || fieldLabel.trim().isEmpty()) {
+                    fieldLabel = fieldId;
+                }
 
-                if (newValue != null && !Objects.equals(oldValue, newValue)) {
+                String oldLabel = oldValue;
+                String newLabel = newValue;
+                if (targetElement instanceof SelectBox) {
+                    Collection<FormRow> optionMap = FormUtil.getElementPropertyOptionsMap(targetElement, formData);
+                    oldLabel = resolveOptionLabel(oldValue, optionMap);
+                    newLabel = resolveOptionLabel(newValue, optionMap);
+                }
+
+                if (!Objects.equals(oldValue, newValue)) {
                     messageBuilder
-                        .append("<p>Changed <b><i>").append(fieldLabel.isEmpty() ? fieldId : fieldLabel)
-                        .append("</i></b> from <b><s>").append(oldValue.isEmpty() ? "Empty" : oldValue)
-                        .append("</s></b> to <b>").append(newValue)
+                        .append("<p>Changed <b><i>").append(fieldLabel)
+                        .append("</i></b> from <b><s>").append(oldLabel.isEmpty() ? "Empty" : oldLabel)
+                        .append("</s></b> to <b>").append(newLabel.isEmpty() ? "Empty" : newLabel)
                         .append("</b></p>");
                 }
             }
@@ -173,6 +187,32 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
 
     public String getFieldType() {
         return getPropertyString("fieldType");
+    }
+
+    private String resolveOptionLabel(String value, Collection<FormRow> optionMap) {
+        if (value == null || value.isEmpty() || optionMap == null || optionMap.isEmpty()) {
+            return value != null ? value : "";
+        }
+
+        // Build lookup map: value -> label
+        Map<String, String> lookup = new LinkedHashMap<>();
+        for (FormRow row : optionMap) {
+            String optValue = row.getProperty(FormUtil.PROPERTY_VALUE);
+            String optLabel = row.getProperty(FormUtil.PROPERTY_LABEL);
+            if (optValue != null) {
+                lookup.put(optValue, optLabel != null ? optLabel : optValue);
+            }
+        }
+
+        // Handle multi-value (delimiter ";")
+        String[] values = value.split(";");
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < values.length; i++) {
+            String v = values[i].trim();
+            if (i > 0) result.append("; ");
+            result.append(lookup.getOrDefault(v, v));
+        }
+        return result.toString();
     }
 
     private Form generateForm(String formDefId) {
