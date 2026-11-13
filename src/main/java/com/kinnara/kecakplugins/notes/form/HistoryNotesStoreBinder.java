@@ -231,4 +231,22 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
 
         return (Form) formService.createElementFromJson(formDefinition.getJson());
     }
+
+    /**
+     * Check if current element is hidden by the Section
+     *
+     * @param element
+     * @param formData
+     * @return
+     */
+    public boolean isVisible(Element element, FormData formData) {
+        if(element == null) return true;
+
+        if(element instanceof Section) {
+            Section section = (Section) element;
+            return section.isMatch(formData);
+        }
+
+        return isVisible(element.getParent(), formData);
+    }
 }
