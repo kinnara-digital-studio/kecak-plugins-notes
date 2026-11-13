@@ -87,6 +87,7 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
                 Element targetElement = FormUtil.findElement(fieldId, f, formData, true);
                 if (targetElement == null) continue;
                 if (targetElement instanceof HiddenField) continue;
+                if (!isVisible(targetElement, formData)) continue;
 
                 String oldValue = Optional.ofNullable(rowBefore.getProperty(fieldId)).orElse("").trim();
                 String newValue = Optional.ofNullable(FormUtil.getRequestParameter(targetElement, formData)).orElse("").trim();
@@ -241,12 +242,10 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
      */
     public boolean isVisible(Element element, FormData formData) {
         if(element == null) return true;
-
         if(element instanceof Section) {
             Section section = (Section) element;
             return section.isMatch(formData);
         }
-
         return isVisible(element.getParent(), formData);
     }
 }
