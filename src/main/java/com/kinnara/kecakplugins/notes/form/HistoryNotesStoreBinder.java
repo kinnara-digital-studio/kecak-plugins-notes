@@ -88,6 +88,7 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
                 if (targetElement == null) continue;
                 if (targetElement instanceof HiddenField) continue;
                 if (!isVisible(targetElement, formData)) continue;
+                if (isReadonly(targetElement, formData)) continue;
 
                 String oldValue = Optional.ofNullable(rowBefore.getProperty(fieldId)).orElse("").trim();
                 String newValue = Optional.ofNullable(FormUtil.getRequestParameter(targetElement, formData)).orElse("").trim();
@@ -250,5 +251,13 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
             return section.isMatch(formData);
         }
         return isVisible(element.getParent(), formData);
+    }
+
+    public boolean isReadonly(Element element, FormData formData) {
+        if (element == null) return false;
+        if (FormUtil.isReadonly(element, formData)) {
+            return true;
+        }
+        return isReadonly(element.getParent(), formData);
     }
 }
