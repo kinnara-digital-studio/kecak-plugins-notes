@@ -241,7 +241,10 @@ public class HistoryNotesStoreBinder extends FormBinder implements NotesStoreBin
      * @return
      */
     public boolean isVisible(Element element, FormData formData) {
-        if(element == null) return true;
+        if(element == null) return false;
+
+        if(!element.isAuthorize(formData)) return false;
+
         if(element instanceof Section) {
             Section section = (Section) element;
             return section.isMatch(formData);
