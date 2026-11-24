@@ -1,11 +1,10 @@
 package com.kinnara.kecakplugins.notes.form;
 
-import com.kinnara.kecakplugins.notes.model.NoteType;
+import com.kinnara.kecakplugins.notes.common.NoteType;
 import org.joget.apps.app.service.AppUtil;
 import org.joget.apps.form.model.*;
 import org.joget.apps.form.service.FormUtil;
 import org.joget.commons.util.LogUtil;
-import org.joget.commons.util.SetupManager;
 import org.joget.commons.util.TimeZoneUtil;
 import org.joget.directory.model.User;
 import org.joget.plugin.base.PluginManager;

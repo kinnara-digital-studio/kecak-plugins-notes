@@ -1,7 +1,6 @@
 package com.kinnara.kecakplugins.notes.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.kinnara.kecakplugins.notes.common.NoteType;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

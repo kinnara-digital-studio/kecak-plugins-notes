@@ -1,6 +1,7 @@
-package com.kinnara.kecakplugins.notes.model;
+package com.kinnara.kecakplugins.notes.common;
 
 import com.kinnara.kecakplugins.notes.form.NotesElement;
+import com.kinnara.kecakplugins.notes.model.Notes;
 import org.joget.apps.form.model.*;
 
 import java.util.Collection;

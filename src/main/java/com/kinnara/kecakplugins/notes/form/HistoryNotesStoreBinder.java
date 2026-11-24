@@ -1,8 +1,8 @@
 package com.kinnara.kecakplugins.notes.form;
 
-import com.kinnara.kecakplugins.notes.model.NoteType;
+import com.kinnara.kecakplugins.notes.common.NoteType;
 import com.kinnara.kecakplugins.notes.model.Notes;
-import com.kinnara.kecakplugins.notes.model.NotesStoreBinder;
+import com.kinnara.kecakplugins.notes.common.NotesStoreBinder;
 import org.joget.apps.app.dao.FormDefinitionDao;
 import org.joget.apps.app.model.AppDefinition;
 import org.joget.apps.app.model.FormDefinition;
